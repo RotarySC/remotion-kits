@@ -1,0 +1,37 @@
+{
+  "patch": "u1-save-guard",
+  "remotionVersion": "4.0.523",
+  "appliedAt": "2026-10-06T17:39:28.966Z",
+  "files": [
+    {
+      "name": "sequence-props-watchers.js",
+      "absPath": "C:\\Users\\Rotary\\Documents\\Comprehensive\\Files\\Video\\remotion-kit-lab\\node_modules\\@remotion\\studio-server\\dist\\preview-server\\sequence-props-watchers.js",
+      "beforeSha": "4F06E422022A8F4FEEE1D3410FA6AB9B43ECCB8A6A03FF9CFCA40C1BCE2ACEA2",
+      "afterSha": "24DB9F3AB0540F0E14D059173860C3A8FE38A61FF69D206059563D3F5A7E5A3B",
+      "backup": "C:\\Users\\Rotary\\Documents\\Comprehensive\\Files\\Video\\tools\\remotion-u1-guard\\orig\\sequence-props-watchers.js"
+    },
+    {
+      "name": "routes/save-sequence-props.js",
+      "absPath": "C:\\Users\\Rotary\\Documents\\Comprehensive\\Files\\Video\\remotion-kit-lab\\node_modules\\@remotion\\studio-server\\dist\\preview-server\\routes\\save-sequence-props.js",
+      "beforeSha": "ED46EEF08ED12CE27009088C5BBF86DEF38DCF6DC4339D36D1360987E085FB1D",
+      "afterSha": "0DD2B7F2C36A1972710950F934239F8C9EE88BF6BD0E6A83C4CB1E42BC52D3C9",
+      "backup": "C:\\Users\\Rotary\\Documents\\Comprehensive\\Files\\Video\\tools\\remotion-u1-guard\\orig\\routes__save-sequence-props.js"
+    },
+    {
+      "name": "file-watcher.js",
+      "absPath": "C:\\Users\\Rotary\\Documents\\Comprehensive\\Files\\Video\\remotion-kit-lab\\node_modules\\@remotion\\studio-server\\dist\\file-watcher.js",
+      "beforeSha": "96B090413BA97CF1D6DD42ECF94047E687302E3D9169796060C2703D3F318046",
+      "afterSha": "A41C909D383AF72FED7219CB660D267DC7697D829B2683D2C6A965D62398F6F7",
+      "backup": "C:\\Users\\Rotary\\Documents\\Comprehensive\\Files\\Video\\tools\\remotion-u1-guard\\orig\\file-watcher.js"
+    },
+    {
+      "name": "preview-server/undo-stack.js",
+      "absPath": "C:\\Users\\Rotary\\Documents\\Comprehensive\\Files\\Video\\remotion-kit-lab\\node_modules\\@remotion\\studio-server\\dist\\preview-server\\undo-stack.js",
+      "beforeSha": "A915B945BD6D72FD3656EBC2E04F4B7F2436DCD246AB428CB646ACD4F267AE07",
+      "afterSha": "8F8D599DD22AB3FD52DB35CB34FD7D1D2AE26B2B70CC622516B041E4B645135E",
+      "backup": "C:\\Users\\Rotary\\Documents\\Comprehensive\\Files\\Video\\tools\\remotion-u1-guard\\orig\\preview-server__undo-stack.js"
+    }
+  ],
+  "module": "C:\\Users\\Rotary\\Documents\\Comprehensive\\Files\\Video\\remotion-kit-lab\\node_modules\\@remotion\\studio-server\\dist\\preview-server\\sequence-props-save-guard.js",
+  "moduleSha": "EBCE434B3110E7A1E62E3793770CB5ABA188308572D4059FF6215A4371681E2B"
+}
