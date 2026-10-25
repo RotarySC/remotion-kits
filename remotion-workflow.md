@@ -216,44 +216,31 @@ Pop-Location
 
 ### 实例对照：本工作区
 
-本工作区里的套件有**四份**，判据是**逐字节一致**（`tools\mirror-check.ps1`；2026-10-21 复测：母本与镜像各 **113 文件**全等）：
+本工作区里的套件有**四份**，判据是**逐字节一致**（`pwsh tools\mirror-check.ps1` 退出码 0）：
 
-| 位置 | 是什么 | 现场数字（2026-10-21 复测） |
-| --- | --- | --- |
-| `~\.dsh\skills\remotion-kits\` | **技能母本** —— 改动的家 | `kits/` **75 文件**（kernel 58 ＋ hotspot 17） |
-| `remotion-kits-v2/` | 母本的**镜像**（版本库里那一份） | 同上，逐文件哈希比对 |
-| `remotion-kit-lab/` | **验证测试台** —— 夹具与展示页在这里验 | `remotion compositions` **46 条**（9 个演示合成 ＋ 37 个探针/夹具合成） |
-| `hotspot-zcode/production/` | **真实成片项目** —— 本工作区唯一的 **Remotion** 片子 | `remotion compositions` **7 条**；主合成 `ZcodeHotspot` **720 帧 / 24.00 s** |
+| 位置 | 是什么 |
+| --- | --- |
+| `~\.dsh\skills\remotion-kits\` | **技能母本** —— 改动的家 |
+| `remotion-kits-v2/` | 母本的**镜像**（版本库里那一份） |
+| `remotion-kit-lab/` | **验证测试台** —— 夹具与展示页在这里验 |
+| `hotspot-zcode/production/` | **真实成片工程** —— 工作区里唯一走 Remotion 的片子 |
+
+工程副本拿到的是**版本化源码快照**（不是技能安装）：`<工程>/src/kits/` 与母本逐字节一致，
+更新走 [`remotion-kits-v2\tools\update-kits.ps1`](remotion-kits-v2/tools/update-kits.ps1)（**默认只报告**，`-Apply` 才写；
+判据是 `<工程>\.kit-origin\` 里的基线）。⚠️ **更新器住在技能侧**（`remotion-kits-v2\tools\`），**不在**仓库根的
+`tools\` —— 后者是工作区的维护工具，里面没有更新器。
 
 > 工作区里还有一支 `hf-promo/`：**不是 Remotion** —— 它走 `npx hyperframes@0.8.47` 的
 > `dev` / `check` / `render` / `publish`，另有自己的 `BRIEF.md` 与 `AGENTS.md`。
 > 本节讲的是 Remotion 这条路，**不覆盖它**。
 
-工程副本拿到的是**版本化源码快照**（不是技能安装）：`<工程>/src/kits/` 与母本逐字节一致（各 **75 文件**），
-更新走 [`remotion-kits-v2\tools\update-kits.ps1`](remotion-kits-v2/tools/update-kits.ps1)（**默认只报告**，`-Apply` 才写；
-判据是 `<工程>\.kit-origin\` 里的基线）。⚠️ **更新器住在技能侧**（`remotion-kits-v2\tools\`），**不在**仓库根的
-`tools\` —— 后者那 12 个脚本是工作区的维护工具，里面没有更新器。
+**每个工程自己的读数（合成条数、帧数、ffprobe 规格、抽帧抓到的缺陷）写在工程自己的文档里**，
+不在本文复制 —— 复制过来就会漂。真片那次的交付与验收记录见 `hotspot-zcode/` 根下的
+`OUTPUT.md` / `VERIFICATION.md`（工作区坐标，clone 后不解析）。
 
-下面这张表照旧文 §13 的格式，值全部来自 `hotspot-zcode/production` 的实测与它自己的
-`hotspot-zcode/OUTPUT.md` / `hotspot-zcode/VERIFICATION.md`
-（⚠️ 这两份住在 **`hotspot-zcode/`** 根下，**不在** `production/` 里；成片与抽帧同理）：
-
-| 流程环节 | 该项目中的实际体现 |
-| --- | --- |
-| 状态判定 | `production/package.json` ＋ `src/index.ts` ＋ `src/Root.tsx` 齐；`remotion compositions` 列出 **7 条** ⇒ **已有工程，不重开访谈** |
-| 版本 pin | `remotion` / `@remotion/cli` **4.0.523**、`@remotion/layout-utils` 4.0.523、`react` 19.0.0、`typescript` 5.8.2（与 `remotion-kit-lab` 同版；`node_modules` 是指向 lab 的 junction） |
-| 套件来源 | 版本化源码快照 `production/src/kits/`（**75 文件**，与母本逐字节一致），**不用**技能安装 |
-| Audio | **没有音轨** —— `public/` 不存在，成片的 ffprobe 流清单只有 `#0:0`。本片按渲染档「**纯排版**」（无 WebGL / 无外部素材 / 无字体下载） |
-| Duration sync | `SCENE_FRAMES = 60`，`TOTAL_FRAMES = SCENES.length × SCENE_FRAMES` ⇒ 12 场景 ＝ **720 帧**；**没有 `calculateMetadata()`** |
-| Assembly | `src/Video.tsx` ＋ `src/scenes/ZcodeHotspot.tsx`（`renderScene` 的 `switch` ＋ `<Sequence from={index * SCENE_FRAMES}>` 循环）；**不用 `<TransitionSeries>`**，无转场重叠 |
-| Captions | **没有字幕轨**（同 Audio 一栏） |
-| Verify | `tsc --noEmit` **exit 0**；主合成 `720 (24.00 sec)`；**12 张逐场景末帧逐张目视**（`hotspot-zcode/out/stills/zcode-001/`）—— 抓到 **5 个缺陷**（**4 个是内容层**，展示页在原理上覆盖不到），改完**复抽 7 张**二次目视 |
-| 交付 | `hotspot-zcode/out/video/zcode-001.mp4` **3,273,430 B**；ffprobe 实测 **24.00 s / 1920×1080 / 30 fps / h264(avc1) / yuvj420p / 1091 kb/s / 无音轨**，容器注释 `Made with Remotion 4.0.523` |
-| 遗留门禁项 | ① 本片 `hotspot-zcode/OUTPUT.md` §6 仍写「出片 ⏳ 渲染中」，而成片**已在库且 ffprobe 读数与规格一致** ⇒ **那句话没跟上** ② 本片修过工程副本的 `ListLayout.tsx`（**套件级缺陷**，已回写母本） ③ **事实风险最高**：核心技术细节是**单一来源、未独立复现**（项目已用三处限定语标注） |
-
-> **两条边界**（项目自己写下的，别混）：**「元素能不能用、能怎么调」归套件展示页**（输入是最坏情况夹具）；
-> **「这一期的画面成不成立」归制作侧抽帧**（输入是本期真实文案）。判据不在分工偏好，在数据上 ——
-> 那 5 个缺陷里有 4 个是内容层的，展示页**原理上**覆盖不到。
+> **两条边界**：「元素能不能用、能怎么调」归套件展示页（输入是最坏情况夹具）；
+> 「这一期的画面成不成立」归制作侧抽帧（输入是本期真实文案）。判据不在分工偏好，在数据上 ——
+> 真实成片抽帧抓到的缺陷里，多数属于**内容层**，展示页**原理上**覆盖不到。
 
 
 ## 6. 按需查阅

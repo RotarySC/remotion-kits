@@ -16,8 +16,6 @@
 
 > **它是怎么来的**：按 `references/creation-workflow.md` 的八步 —— 先从「热点解析」这个类型需求
 > 拆解出信息形态，再按「主题 → 母版 → 组件」的顺序逐层落地，最后抽帧验证、入库。
-> （拆分前它确实是内核的一份完整副本；2026-10-04 的 T01/T02 裁定之后改成「只放差异」，
-> 本文件下面那些**验证记录**保留了当时的写法与数字 —— 那是历史，不改。）
 
 ## 何时用
 
@@ -36,7 +34,7 @@
 ## 结构
 
 ```
-hotspot/                    ← **17 个文件**（内核 55；拆分前本套件是 57 —— 差的就是内核那一层）
+hotspot/                    ← **只放差异**：内核那一层由 `compose.ts` 补入，不在这里
 ├── compose.ts              ← ★ **资产声明**：`sources: ['../kernel']`
 ├── kit.md
 ├── labels.ts               ← **只填本套件那几层**（版式 / 家具 / 主题 / 自己那几场场景）；
@@ -98,7 +96,7 @@ hotspot/                    ← **17 个文件**（内核 55；拆分前本套�
 避免 Chromium 按字重逐段回退。
 
 **加第三个主题的最简路径**：照 `signal-dark.ts` 复制一份 → 在 `theme/index.ts` 三处登记 →
-重跑下方闭环。**版式与家具一行都不用改**（已实测，见验证记录）。
+重跑下方闭环。**版式与家具一行都不用改**（判据见 `theme-contract.md` 第 6.3 节）。
 
 ## 九个版式的槽契约
 
@@ -123,7 +121,7 @@ hotspot/                    ← **17 个文件**（内核 55；拆分前本套�
 **消费 `lines` 槽的版式必须调用 `splitEntry`** —— 直接把整条字符串交给浏览器，
 TAB 会被 HTML 塌缩成一个空格，主字段与说明的区别**完全消失**，而且不报错、`tsc` 全绿。
 本套件有 4 个消费者：`timeline` / `stance` / `multi-stat` / `list`。
-其中 `list` 曾经漏了这一步（真实片子的抽帧抓到，见验证记录）。
+其中 `list` 曾经漏了这一步 —— 真实片子的抽帧抓到过，`tsc` 全绿、画面里主字段与说明粘成一句。
 
 ### 三个新版式的设计理由（都是形态决定的）
 
@@ -227,236 +225,14 @@ npx remotion render HotspotMasterShowcase out/draft.mp4 --scale=0.5 --crf=28 --j
 | `Scene.tsx` 只服务组件层验证 | 出片一律用母版；组件层验证**故意不经过母版**，否则家具与几何会遮蔽组件自身的行为。⚠️ 它现在住在**内核**（随元件层一起补入） |
 | 三个新版式的分栏靠 `flex: 1` + 固定 `width` | 中文断行由浏览器做（护栏量的是最长一条的整体宽度），极长单词会溢出 |
 
-## 验证记录（实测，非推断）
+## 验证记录
 
-> ⚠️ **本节是历史记录，按当时的样子保留。** 那个时期：内核叫 `kit-core`、
-> **每个套件各带一份内核的完整副本**（本套件当时 57 个文件）、展示页的页签是 `#tab=kit-core`、
-> 每个套件自带 `KitShowcase` 与 `FORKS.md`。2026-10-04 的 T01/T02 裁定之后这些都不成立了
-> （见本文件开头的「与内核的关系」）。**`FORKS.md` 后来按 T01 §3 删掉了** ——
-> 它的活由**更新器**的基线接手（`tools/update-kits.ps1`）。
-> **要复现这里的命令，把 `kit-core` 换成 `kernel`**；那几轮的逐字节比对记录仍然说明当时的事实，
-> 但已经不是今天该做的动作。
-> 教训本身没变：**`tsc` 抓不到渲染期错误，抽帧是唯一可靠的确认手段。**
+**验收 = 三件事**：`tsc --noEmit` exit 0 · `compositions` 列出全部合成 · **按版式抽帧并真的看图**
+（9 个版式各一张，清单类补末尾帧；加主题时每主题 × 每版式一张）。命令见 `SKILL.md` 第四节。
 
-环境：Remotion **4.0.523**、TypeScript **5.8.2**、React **19.0.0**、`strict: true`、Chromium 内核 = Edge。
+本套件的三个专属版式是抽帧重点：它们的分栏与字号在真实文案上最容易出问题。
 
-| 检查 | 结果 |
-| --- | --- |
-| `tsc --noEmit` | ✅ exit 0 |
-| `remotion compositions` | ✅ 4 个合成注册成功：`HotspotKitShowcase`(240) / `HotspotMasterShowcase`(660) / `HotspotThemeShowcase-signal-dark`(660) / `HotspotThemeShowcase-alert-contrast`(660) |
-| **6.1 静态封层**（layouts / furniture / guards / components 里的色值 / 主题名 / `getTheme`） | ✅ **0 命中**；4 个封层目录里每个文件都只 import `theme/context` |
-| **6.2 抽帧**：2 个主题 × 10 个场景（`--scale=0.5`） | ✅ 20 张全部 exit 0，逐张目视正确 |
-| **6.2 抽帧**：4 个清单类版式的**末尾帧**（全分辨率） | ✅ `timeline`@296 / `stance`@356 / `multi-stat`@416（异质）/@476（同质） |
-| 组件层（`HotspotKitShowcase` @178） | ✅ 出图正常，强调条 / 高亮 / 下划线都跟着主题走 |
-| **6.3 硬指标**：改 `signal-dark` 的 `accent` + `stagger` + `blockRadius` 三处 | ✅ **29 个封层文件逐条一致（版式 0 行改动）**；还原后与基线逐条一致 |
-| 可选分支覆盖 | ✅ `phase` 有/无、`unit` 有/无、可信度 `high`/`medium`/`low`、`note` 有/无 —— 全部在抽帧里出现过 |
-| **基座回归同步** | ✅ 基座修掉「孤字 / 长引文折行」两个缺陷后，本套件的 `guards/fitting.ts`、`components/Quote.tsx`、`master/layouts/HeadlineLayout.tsx` 已同步（12 个封层文件与 `kit-core` 再次逐字节一致），并重跑本套件的 **2 主题 × 10 场景**抽帧 |
+## 实施记录
 
-### 抽帧抓到并修掉的 2 个缺陷（`tsc` 全绿，只有看图能发现）
-
-| # | 症状 | 根因 | 修法 |
-| --- | --- | --- | --- |
-| 1 | **时间线的竖轨在深色主题下几乎看不见**，版式读起来像一份清单 | 两个原因叠加：`signal-dark` 的 `rule`（`#1B2927`）太暗，不足以承担结构线；轨道又取了发丝粗细（`ruleThickness` = 1px）。**同一个版式在浅色主题下正常**，说明问题在值而不在版式 | ① `rule` → `#2E4440`（界格线要能当结构线用）；② 轨道改用 `graphic.railThickness`（1px 主题给 3px、粗条主题给 6px）。顺带让页脚规则线与数字下强调条也变清楚 |
-| 2 | **共享 `unit` 被套到异质数字上**，出现「02:41 条」「17.4 条」这种错话 | 槽契约把 `unit` 定义成「共同单位」，而热点解析里的数字**常常不同单位**（讨论量 / 账号数 / 用时 / 增速），所以这个字段在真实内容上会被误用 | ① `LAYOUT_SPECS` 的 `note` 写明「**只有全部数字同单位时才用**；不一致就把单位写进每个数值里」；② 演示改成**两个 `multi-stat` 场景**：一次异质（单位内嵌、不传 `unit`）、一次同质（传 `unit`）—— 两条分支各验一遍 |
-
-> 这两条都是**框架该暴露的东西**：第 1 条说明「主题值要经过抽帧校准，不能凭感觉给」，
-> 第 2 条说明「槽契约的字段语义要在真实内容上验，否则会被误用」。两条均已写进上表的已知限制。
-
-### 回写：`list` 漏解析 `lines` 槽 + 夹具补上缺失的分支
-
-`list` 的 `items` 是 `lines` 槽，却从未调用 `splitEntry`。**本套件的演示合成一直没暴露它** ——
-因为 `list` 场景从来没写过带主字段的条目，这条分支在展示页里根本走不到。
-最后是**一支真实片子**的抽帧一撞就撞上了：一段
-「本地打包 据排查：客户端扫描工作区…」被读成一句话。
-
-修法与波及面：`kits/*/master/layouts/ListLayout.tsx`（两份）、基座新增 `master/slots.ts`、
-`references/master-contract.md` §4/§5 各补一条硬规则。夹具侧 `SHOWCASE_LAYOUTS` 里
-`list` 出现**两次**（不带 / 带主字段），第二遍放在**末尾**以免改动前面所有场景的帧号。
-
-| 检查 | 结果 |
-| --- | --- |
-| `tsc --noEmit` | ✅ exit 0 |
-| `remotion compositions` | ✅ `HotspotMasterShowcase … 660 (22.00 sec)`（11 场景 × 60 帧） |
-| 抽帧：**带主字段** | `HotspotMasterShowcase @656`（场景 10）→ ✅ 主字段右对齐 / 等宽 / 强调色，与说明**一眼分得开**；5 条主字段长度不一，未溢出 |
-| 抽帧：**不带主字段** | `HotspotThemeShowcase-signal-dark @176`（场景 2）→ ✅ 照旧，帧号与改动前一致 |
-| 主题对照 | `HotspotThemeShowcase-alert-contrast @656` 抽查浅色主题 → ✅ 强调色在纸白底上对比度足够 |
-| 演示合成 | ✅ `list` 两条分支各一场；旧帧号（176 / 296 / 356 / 416 / 476 / 510 / 570）**全部仍然有效** |
-
-> **教训**：「每个 prop 分支都摆一遍」如果只有**声明**、没有校验，就等于没摆。
-> 本套件的可选分支覆盖表（文件头注释）当时列了 4 条，恰好漏掉的就是最容易坏的那条结构分支。
-
-### 展示页：五层展品补中文名（新增 `labels.ts`）
-
-需求是「展示页里每个展品都要有中文名」。口径：**代码名在前、中文名在后**（`Title · 主标题`），
-五层全做（元素 / 版式 / 家具 / 主题 / 场景）。
-
-| 检查 | 结果 |
-| --- | --- |
-| 新增 `labels.ts` | **29 条**：元素 10 / 版式 9 / 家具 4 / 主题 2 / 场景 4 |
-| 覆盖率校验（`generate.ps1`） | ✅ **0 处不一致**（`-DiscoverOnly`） |
-| 校验器**真的会响**（反向注入） | ✅ 把 `'Title'` 改成 `'Titel'` + 删掉 `'alert-contrast'` → 命中 **3 条 WARN**（元素缺名 / 键对不上 / 主题缺名），还原后回到 0 |
-| 展示页验收（`showcase/verify.mjs`） | ✅ **49/49**（当轮总数；现为 **52**），从 `#tab=*` / `hotspot` / `kit-core` 三个入口各跑一遍 |
-| 页面观感 | ✅ 抽图确认：元素铭牌 `Title · 主标题`、版式 `cover · 封面`、家具 `EventStamp · 事件时间戳`、主题 `signal-dark · 信号暗色`、场景 `Scene 1 — heading · 标题` |
-| **出片路径 0 行改动** | ✅ `theme/**` + `master/**` + `guards/**` + `components/**` + `templates/**` 共 **40 个文件与改动前逐字节一致**（SHA256 比对） |
-
-> `labels.ts` **只被 `showcase/generate.ps1` 解析**，出片路径一次都不读它 ——
-> 所以它没有进 `ComponentSpec` / `LayoutSpec` / `Theme` / `FurnitureConfig`。
-> 中文名是展示，不是运行；而且五层里有三层根本没有声明文件，逐层加字段会变成三套机制。
-
-### 新增两个原语：`MediaStage` + `MediaCard`（自基座复制）
-
-基座加了「多媒体框」两个原语（大框 + 带缩放特性的迷你框），本套件**原样复制**：
-
-| 检查 | 结果 |
-| --- | --- |
-| 复制范围 | `components/{MediaStage,MediaCard,specs}.tsx`、`templates/{KitShowcase,mockMedia}.tsx/ts`、`assets/`、`labels.ts` 的 `elements` 两条 |
-| 与基座逐字节一致 | ✅ 上述文件与本套件的对应文件**逐字节相同**（`Scene.tsx` 也仍一致） |
-| `tsc --noEmit` | ✅ exit 0 |
-| `remotion compositions` | ✅ `HotspotKitShowcase` **510 帧**（原 240：+3 场） |
-| 抽帧 | ✅ 与基座同一组：大框静态（`cover` 裁切）/ 大框视频（`contain` 留边 + 逐帧在变）/ 迷你框群静止与展开 |
-| **基座后续修正已回灌** | ✅ 基座修掉「标题在半程换边」「展开框被静止框压住」两处后，`components/{MediaCard,specs}.tsx` 已重新复制（本套件 4 个副本的 `MediaCard.tsx` / `MediaStage.tsx` / `specs.tsx` 再次**逐字节一致**） |
-| **新增 `ScrollArea` 已回灌** | ✅ 基座新增「滚动区」后，`components/ScrollArea.tsx`、`templates/{mockDoc.tsx,KitShowcase.tsx}`、`components/specs.tsx` 已复制（四份副本**逐字节一致**）；本套件的 `labels.ts` 只加了 2 条（元素 `ScrollArea` + 场景 `Scene 8`），**其余各层仍是本套件自己的** |
-| **`ScrollArea` 在本套件也抽帧验过** | ✅ `HotspotKitShowcase` 600 帧，8 场各一张；`Scene 8` 用**本套件的主题**渲染（标题栏与行号取 `signal-dark` 的 accent），钉住 / 平移 / 滑块位置都对 |
-| **本套件特有部分一行未动** | ✅ `theme/**` `master/**`（含 3 个专属版式与 2 件专属家具）、`ShowcaseScenes.tsx` 的 11 场景夹具均未改 |
-
-设计与两个实测坑见 `kits/kernel/kit.md` 的同名小节 —— 不在这里重抄一份（两份真相一定会分叉）。
-
-### 新增三个原语：`TextTag` + `RichTextBox` + `BarChart`（自基座复制）
-
-基座加了「文字标签 / 富文本框 / 水平条形图」三个原语，本套件**原样复制**：
-
-| 检查 | 结果 |
-| --- | --- |
-| 复制范围 | `components/{TextTag,RichTextBox,BarChart,specs}.tsx`、`templates/{mockData.ts,KitShowcase.tsx}`；本套件的 `labels.ts` 只加了 6 条（3 元素 + 3 场景） |
-| 与基座逐字节一致 | ✅ 上述文件与本套件的对应文件**逐字节相同**（四份副本一起比对） |
-| `tsc --noEmit` | ✅ exit 0 |
-| `remotion compositions` | ✅ `HotspotKitShowcase` **780 帧**（原 600：+3 场各 60 帧） |
-| 抽帧 | ✅ 三场各一张（`648 / 690 / 755`）—— 用**本套件的主题**渲染：标签取 `signal-dark` 的绿强调 + 方角，条形图的条与数值同色，富文本的高亮 / 行内代码都跟着主题走 |
-| 回归抽帧 | ✅ 8 场各一张（`30/90/150/210/270/330/430/555`）**与改动前逐字节相同** —— 本套件特有部分零回归 |
-| **本套件特有部分一行未动** | ✅ `theme/**`、`master/**`（含 3 个专属版式与 2 件专属家具）、`ShowcaseScenes.tsx` 的 11 场景夹具均未改 |
-
-三条设计决定与两条实现细节见 `kits/kernel/kit.md` 的同名小节 —— 不在这里重抄一份。
-
-### 新增一个原语：`Panel`（内容卡，自基座复制）
-
-基座加了「内容卡」原语（有边界的容器：头 / 身 / 尾三段槽、框高跟内容走、`dim` 强调态），本套件**原样复制**：
-
-| 检查 | 结果 |
-| --- | --- |
-| 复制范围 | `components/{Panel,specs}.tsx`、`templates/{mockData.ts,KitShowcase.tsx}`；本套件的 `labels.ts` 只加了 2 条（元素 `Panel` + 场景 `Scene 12`） |
-| 与基座逐字节一致 | ✅ 上述文件与本套件的对应文件**逐字节相同**（四份副本一起比对） |
-| `tsc --noEmit` | ✅ exit 0 |
-| `remotion compositions` | ✅ `HotspotKitShowcase` **840 帧**（原 780：+1 场 60 帧） |
-| 抽帧 | ✅ 两帧（`810` / `828`，强调态的两个端点）—— 用**本套件的主题**渲染：标签取 `signal-dark` 的绿强调、方角；描边与硬阴影取 `ink`，所以深色主题上是**浅色偏移**，仍然看得见 |
-| 回归抽帧 | ✅ 8 场各一张与改动前逐字节相同 |
-| **本套件特有部分一行未动** | ✅ `theme/**`、`master/**`（含 3 个专属版式与 2 件专属家具）、`ShowcaseScenes.tsx` 的 11 场景夹具均未改 |
-
-⚠️ **一条同步事故（这一轮踩的，已恢复）**：批量复制时 `labels.ts` 被当成「套件无关文件」，
-于是**基座那份覆盖了本套件的** —— 9 个版式 / 4 件家具 / 2 个主题的中文名全被抹掉。
-靠已发布的技能镜像恢复。**教训**：`labels.ts` 是套件特有的，**不要写进多套件批量复制的清单**。
-
-### 新增一个原语：`Stat`（大数字）+ `Panel` 的宽度旋钮（自基座复制）
-
-基座这一轮做了两件事：给 `Panel` 加了**宽度旋钮**（撑满 / 定宽 / `'fit'` 跟内容走），
-新增「大数字」原语（数字 + 单位 + 标签，三段错开入场）。本套件**原样复制**：
-
-| 检查 | 结果 |
-| --- | --- |
-| 复制范围 | `components/{Panel,Stat,specs}.tsx`、`templates/{mockData.ts,KitShowcase.tsx}`；本套件的 `labels.ts` 只加了 2 条（元素 `Stat` + 场景 `Scene 13`） |
-| 与基座逐字节一致 | ✅ 上述文件与本套件的对应文件**逐字节相同**（四份副本一起比对） |
-| `tsc --noEmit` | ✅ exit 0 |
-| `remotion compositions` | ✅ `HotspotKitShowcase` **900 帧**（原 840：+1 场 60 帧）；`HotspotMasterShowcase` 未动（660） |
-| 抽帧 | ✅ 大数字（`870` / `850`）—— 用**本套件的主题**渲染：数字取 `signal-dark` 的青绿强调、方角、等宽；三段错开（第 10 帧只有数字，第 30 帧齐） |
-| 回归抽帧 | ✅ 内容卡（`805`）与改动前逐字节相同；13 场各一张都出得来 |
-| 展示页验收 | ✅ **61/61**（上一轮 57）；本套件的元素墙 **18/18** 有中文名 |
-| **本套件特有部分一行未动** | ✅ `theme/**`、`master/**`（含 3 个专属版式与 2 件专属家具）、`ShowcaseScenes.tsx` 的 11 场景夹具均未改 |
-
-### 大数字的三条「动态」（自基座复制）
-
-基座这一轮给 `Stat` 加了两件事：`reserveChars`（数字区按 N 个字符预留宽度 —— 跳动与计数到时
-位数变化不会推着单位跑）与 `rollFrom` + `roll`（逐位滚动）。本套件**原样复制**：
-
-| 检查 | 结果 |
-| --- | --- |
-| 复制范围 | `components/{Stat,specs}.tsx`、`templates/{mockData.ts,KitShowcase.tsx}`；本套件的 `labels.ts` 改了 1 条（`Scene 13` 改名）+ 加了 1 条（`Scene 14`） |
-| 与基座逐字节一致 | ✅ 上述文件与本套件的对应文件**逐字节相同**（四份副本一起比对） |
-| `tsc --noEmit` | ✅ exit 0 |
-| `remotion compositions` | ✅ `HotspotKitShowcase` **960 帧**（原 900：+1 场 60 帧）；`HotspotMasterShowcase` 未动（660） |
-| 抽帧 | ✅ 两条新场景都出得来（计数到 `854` / `866` / `880`、数位滚动 `915` / `950`）；`%` 的像素位置在本套件的主题下同样恒定 |
-| 展示页验收 | ✅ **62/62**（上一轮 61）；本套件的场景墙 **14/14** 有中文名 |
-| **本套件特有部分一行未动** | ✅ `theme/**`、`master/**`（含 3 个专属版式与 2 件专属家具）、`ShowcaseScenes.tsx` 的 11 场景夹具均未改 |
-
-### 元素格子的「越界与贴边」＋ `MediaStage` 默认尺寸的修正（自基座复制）
-
-基座这一轮修了三件事，其中**只有第三件是组件逻辑**：
-
-1. `Stat` 演示的字号 / 条间距（摆得太大，贴着内容区上下边）；
-2. `Panel` 演示从**上下叠**改成**左右并排**，并把它那两段的 `RichTextBox.maxWidth` 从 460 收到 300；
-3. **`MediaStage` 的默认尺寸**：原来取安全区的**宽度**（1760），而 16:9 的 1760 有 990 高 ——
-   安全区只有 880，框**上下各越出 55px**、压进报头与页脚带。改成**安全区里放得下的最大 16:9**。
-
-| 检查 | 结果 |
-| --- | --- |
-| 复制范围 | `components/{MediaStage,specs}.tsx`（`Panel.tsx` / `Stat.tsx` 本轮未改，只改演示） |
-| 与基座逐字节一致 | ✅ 上述文件与本套件的对应文件**逐字节相同**（四份副本一起比对） |
-| `tsc --noEmit` | ✅ exit 0 |
-| `remotion compositions` | ✅ 两条时间轴都没变（`HotspotKitShowcase` 960 / `HotspotMasterShowcase` 660） |
-| 抽帧 | ✅ 多媒体框两场（`270` / `330`）用**本套件的主题**渲染：方角、`signal-dark` 的描边色，1564×880 落在安全区内 |
-| 展示页验收 | ✅ **63/63**（上一轮 62）；本套件的 18 个元素格四边余量都够（16:9 满幅那条按判据豁免） |
-| **本套件特有部分一行未动** | ✅ `theme/**`、`master/**`、`ShowcaseScenes.tsx` 的 11 场景夹具均未改 |
-
-### 新增一个原语：`Flow`（排列）＋ `Panel` 可被拉伸 ＋ 版式节奏可覆盖（自基座复制，2026-10-03）
-
-基座这一轮把「一屏怎么分」从手写 flex 收进容器（`Flow`）、让 `Panel` **天生可被拉伸**，
-并给五个版式加了 `staggerInFrames`（**显式值原样生效、不参与收紧** —— ⚠️ 当时**未裁定**，见 T06；
-**T06 已于 2026-10-05 裁定为「原样生效 ＋ 溢出诊断」**，见本节末）。本套件：
-
-| 检查 | 结果 |
-| --- | --- |
-| 复制范围 | `components/{Flow,Panel,specs}.tsx`、`templates/KitShowcase.tsx`（四份**逐字节相同**）；`labels.ts` 只加了 2 条（元素 `Flow` + 场景 `Scene 15`） |
-| 本套件**特有**改动 | 三个专属版式 `TimelineLayout` / `StanceLayout` / `MultiStatLayout` ＋ `ListLayout` 各加 `staggerInFrames`（走 `slots.ts` 的 `staggerFrames`，而基座那份是**内联公式** —— 两份公式仍不等价，见下） |
-| `tsc --noEmit` | ✅ exit 0 |
-| `HotspotKitShowcase` | 960 → **1020 帧**（+1 场 60 帧） |
-| 抽帧（**本套件主题**） | ✅ `out/flow/hs-flow-990.png` 扫描边实测：主 **1151** · 侧 **575**（比值 **2.002**）、两卡竖直跨度**都是** 110..637；下行三格宽 **847/423/423**（B:C 1.000）、三格高 **162/162/162**（极差 **0**） |
-| 默认画面不变 | ✅ 既有场景的帧在改动前后**逐字节相同**（基座侧实测 Scene 12 的 800 / 820 帧），而新场景不同 —— **两向都有对照** |
-| 一条**有意没做**的事 | 基座那份 `ListLayout` 的内联收紧公式与 `slots.ts` 的 `staggerFrames` **仍不等价**（`hold` 32 vs 34、基座多一个下限 `Math.max(2, …)`）。统一会改动默认画面，而本轮验收基准恰恰是「默认逐帧不变」，所以**留着** —— 记为已知问题 |
-
-判据细节与两条测量坑（8px 硬阴影要取亮段起点、竖直扫描要按行限定 y 范围）见 `kits/kernel/kit.md` 的同名小节。
-
-### 复跑命令
-
-```powershell
-$lab="<LAB>"; $k="<SKILL_DIR>\kits\hotspot"
-Remove-Item "$lab\src\kits\hotspot" -Recurse -Force -ErrorAction SilentlyContinue
-Copy-Item $k "$lab\src\kits\hotspot" -Recurse
-Push-Location $lab
-& "$lab\node_modules\.bin\tsc.cmd" --noEmit
-& "$lab\node_modules\.bin\remotion.cmd" compositions
-# 每个主题每个版式一张（前 4 个取中点帧，后 4 个清单类取末尾帧，quote/closing 取中点）
-foreach ($t in @('signal-dark','alert-contrast')) {
-  foreach ($f in @(30,90,150,210,296,356,416,476,510,570,630)) {
-    & "$lab\node_modules\.bin\remotion.cmd" still "HotspotThemeShowcase-$t" "out/$t-$f.png" --frame=$f --scale=0.5
-  }
-}
-# 本类型特有的 3 个版式 + 两个 multi-stat + 带主字段的 list：全分辨率末尾帧
-foreach ($f in @(296,356,416,476,656)) {
-  & "$lab\node_modules\.bin\remotion.cmd" still HotspotMasterShowcase "out/m-$f.png" --frame=$f
-}
-Pop-Location
-```
-
-然后**用看图工具逐张看** —— 这是唯一可靠的验收方式。**注意：3 个新版式是清单类的，抽中点帧会只看到前几条。**
-
-### T06 落地：显式节奏溢出的诊断（2026-10-05）
-
-裁定**原样生效、不参与收紧**，代价用**开发期诊断**顶上。本套件三个版式
-（`TimelineLayout` / `StanceLayout` / `MultiStatLayout`）各加一次
-`warnIfStaggerOverflows`（来自**内核**的 `guards/diagnostics.ts`）——判据是
-`首条起始 + (条数−1) × stagger + 入场时长 > 场景时长` 就喊一声，**不改行为**。
-
-| 项 | 值 |
-| --- | --- |
-| 三个版式的参数 | `TimelineLayout` lead **14** / 入场 **20** · `StanceLayout` **16** / **22** · `MultiStatLayout` **14** / **22** |
-| 为什么参数要由版式给 | 它们**不是**同一个数（内核那份 `ListLayout` 是 14 / 18）—— 这正是「不统一收紧公式」那条既有决定在诊断上的后果 |
-| 新增的跨套件依赖 | `../../../kernel/guards/diagnostics` —— 类型包 import 内核是 T01/T02 之后的正常形状（也正因此踩到了更新器的一个缺陷，见 `docs/2026-10-04-更新器-裁定与执行.md` §6 第 10 条） |
-| 误报检查 | 展示页验收的「console error/warning 为 0」那条断言对三个版式的**默认**路径仍然全绿（默认值是收紧过的，本来就不会溢出） |
+逐轮实施记录**不在本文件里**：本类型三个版式的设计理由、抽帧抓到的缺陷与修法都在 **git 历史**
+（`git log --follow -- kits/hotspot/kit.md`）。本文件只描述**现状**：清单 / 已知限制 / 验收要跑什么。
