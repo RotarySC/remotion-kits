@@ -13,7 +13,7 @@
 | 内核原语 19 | `remotion-kits-v2/kits/kernel/components/`：Panel · Flow · Stat · BarChart · ScrollArea · MediaStage · RichTextBox …；`specs.tsx` 是唯一登记表 |
 | 通用版式 6 | cover · headline · list · stat · quote · closing；`LAYOUT_SPECS` 与 `ShowcaseScenes` 一一对应 |
 | 家具 2 | `FooterRail` · `Masthead`：由母版注入，场景不自己摆 |
-| 主题 4 | default · bubble-pop · neon-terminal · paper-seal；换主题不动版式 |
+| 主题 4 | `default-dark` · `paper-seal` · `bubble-pop` · `neon-terminal`；换主题不动版式 |
 | 溢出护栏 4 | `fitting` · `ClampLines` · `diagnostics` · `placement`：溢出要喊出来，不静默裁掉 |
 | 最小动效 | `motion.ts`：公共计算 ＋「淡入上移」组合；`from` 是入场时间原点 |
 | 皮（外观预设） | `skins/`：具名预设 ＋ 四角角标；优先级 实例 prop > 皮 > 主题；默认皮一个像素都不动 |
