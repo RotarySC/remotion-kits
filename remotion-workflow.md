@@ -121,8 +121,8 @@ const durationInFrames = endFrame - startFrame;
 4. 在 Studio 检查完整节奏与视觉连续性；试听旁白、音乐压混、静音、爆音、发音、首尾截断。必要时做短范围真实渲染验证只在导出期出现的问题。
 5. 将检查项、帧号、结果和修复写入 `qa.md`。失败时回到最近的责任阶段，并重跑受影响的下游检查。
 
-完成判据必须是可观察结果：例如“第 180 帧标题完整落在安全区内”“第 2、3 秒画面指纹不同”“最终音频尾部晚于最后一句结束”，而不是“看起来正常”。具体浏览器、抽帧与环境陷阱见工作区 [AGENTS.md](AGENTS.md) §1.6（无头浏览器验收的坑）、
-§1.8（PowerShell 的坑）与 §3（已知事实与教训）。
+完成判据必须是可观察结果：例如“第 180 帧标题完整落在安全区内”“第 2、3 秒画面指纹不同”“最终音频尾部晚于最后一句结束”，而不是“看起来正常”。具体浏览器、抽帧与环境陷阱见 [README.md](README.md)「已知限制与未验证项」里的
+「最容易再踩的坑」（PowerShell 与无头浏览器验收两类）。
 
 ### 阶段 7：渲染与交付
 
@@ -188,7 +188,7 @@ video-job/
 > `.shots/`、`hf-promo/` **都不在仓库里** —— 它们是判据与物证的产地，留在本机。所以那些相对路径在
 > clone 出来的仓库里**不解析**：它们是**工作区坐标**，不是仓库内的链接。
 
-在**工程根目录**执行 Remotion CLI；它从当前目录寻找入口。下面的命令是操作形状，具体合成 ID、文件名与项目脚本取当前工程实际值。`remotion-kit-lab` 当前锁定 `4.0.523`，新项目先查看自身 `package.json` 与 `remotion versions`，不要把这个版本当作永久常量。网络与浏览器等可变环境事实及复测命令见工作区 [AGENTS.md](AGENTS.md) §1。
+在**工程根目录**执行 Remotion CLI；它从当前目录寻找入口。下面的命令是操作形状，具体合成 ID、文件名与项目脚本取当前工程实际值。`remotion-kit-lab` 当前锁定 `4.0.523`，新项目先查看自身 `package.json` 与 `remotion versions`，不要把这个版本当作永久常量。网络与浏览器等可变环境事实及复测命令见 [README.md](README.md)「安装与启动」与「自验」。
 
 ```powershell
 $projectRoot = 'C:\path\to\video-job'
@@ -207,7 +207,7 @@ Pop-Location
 
 新建项目时，先按 `remotion-create` 选择脚手架与目录；既有工程优先复用依赖与配置。此机的 `remotion.config.ts` 要探测 Edge 并设置 `angle`，具体样例见 `remotion-kit-lab/remotion.config.ts`。`remotion` 抽帧与渲染会派生 esbuild 和 Edge；若受限环境报 `spawn EPERM`，在允许子进程的环境中重跑，不能把该错误归为合成代码缺陷。
 
-脚手架示例：在适合创建新工程的父目录运行 `npx create-video@latest --yes --blank --no-tailwind video-job`，然后进入 `video-job`。先按 [AGENTS.md](AGENTS.md) §1 复测 npm 可达性。
+脚手架示例：在适合创建新工程的父目录运行 `npx create-video@latest --yes --blank --no-tailwind video-job`，然后进入 `video-job`。先按 [README.md](README.md)「安装与启动」里的 `npm ping` 复测 npm 可达性。
 
 > ⚠️ 原句还指到「[原技能体系文档](remotion-workflow.md) §2、§4」—— 那是**重写前**那份
 > `docs/remotion-workflow.md`（**633 行 / 15 节**），本文取代了它，所以那个链接**指回了自己**。
@@ -262,7 +262,7 @@ Pop-Location
 | --- | --- |
 | 从模糊想法确定体裁、brief 与执行模式 | 技能 `remotion-intent` 的 `SKILL.md` 与 `references/brief-format.md` |
 | 复用、扩展或回归套件 | 技能 `remotion-kits` 的 `SKILL.md`、`references/catalog.md`、目标套件 `kit.md`；仓库里那一份在 [`remotion-kits-v2/`](remotion-kits-v2/) |
-| 本机 Edge、字体、CLI、抽帧和工作区制作约定 | 工作区 [AGENTS.md](AGENTS.md) §1（环境事实）、§3（已知事实与教训）、§6（方法） |
+| 本机 Edge、字体、CLI、抽帧与验收判据 | [README.md](README.md)「安装与启动」·「自验」·「已知限制与未验证项」 |
 | 当前 API 或升级 | `remotion-docs`、`remotion-upgrade` 与项目锁定版本的官方文档 |
 
 以上文件是参考与契约，不替代用户当前任务要求。若规则冲突，先核对项目实际版本、当前用户要求和目标技能的适用范围，并在执行记录中说明采用的决定。
