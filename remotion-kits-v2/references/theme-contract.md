@@ -92,10 +92,10 @@ const theme = useTheme();
 - **未套母版时** `useTheme()` 返回**内核注册表里的第一个主题**（`default-dark`）——
   所以原语可以脱离母版单独使用。⚠️ 类型包要表达「本套件的默认长相」，是在**它自己的母版适配器**里
   给 `theme` 一个默认值（如 `kits/hotspot/master/MasterFrame.tsx` 的 `theme = THEMES[THEME_IDS[0]]`），
-  **不是**再复制一份 `context.tsx`（拆分前每个套件各有一份，两份只差一行 —— 那就是分叉）；
+  **不是**再复制一份 `context.tsx` —— 复制就是分叉；
 - **不要**在模块顶层 `import {theme} from '…/theme/default'` 然后到处引用。
   那样组件只会长成那一个主题的样子，同一套组件放进别的主题就失效
-  （内核里曾经有个 `tokens.ts` 就是这么干的，已删除）。
+  （把颜色收敛到一个模块常量再让组件 import，是这条错误最常见的形态）。
 
 ## 5. 每个字段都必须有消费者
 

@@ -112,15 +112,16 @@
 
 ### 主题（换主题不换版式）
 
-| 主题 | 长相 | 改一行就能用 |
-| --- | --- | --- |
-| `default-dark` | 深色现代：Inter / 微软雅黑，冷蓝强调，圆角 4 | `<MasterFrame theme={getTheme('default-dark')}>` |
-| `paper-seal` | 宣纸楷书：KaiTi / FangSong，朱砂强调，方角，宽边距 | 同上换 id |
-| `bubble-pop` | 卡通：Comic Sans / 微软雅黑，荧光粉强调，粗胶囊 | 同上换 id |
-| `neon-terminal` | 终端：全等宽 + FangSong，霓虹绿强调，1px 直角 | 同上换 id |
+| 主题 | 长相 |
+| --- | --- |
+| `default-dark` | 深色现代：Inter / 微软雅黑，冷蓝强调，圆角 4 |
+| `paper-seal` | 宣纸楷书：KaiTi / FangSong，朱砂强调，方角，宽边距 |
+| `bubble-pop` | 卡通：Comic Sans / 微软雅黑，荧光粉强调，粗胶囊 |
+| `neon-terminal` | 终端：全等宽 + FangSong，霓虹绿强调，1px 直角 |
 
-**新增主题不动版式一行** —— 判据与实测见 `theme-contract.md`。一个主题一个合成时，
-照 `templates/ThemeShowcase.tsx` 的 `THEME_IDS.map(...)` 批量注册。
+用法一律是 `<MasterFrame theme={getTheme('<id>')}>`，换 id 就是换长相。
+**新增主题不动版式一行** —— 判据见 `theme-contract.md`；一个主题一个合成时，照
+`templates/ThemeShowcase.tsx` 的 `THEME_IDS.map(...)` 批量注册。
 
 展示页上每个主题显示成 `paper-seal · 宣纸朱砂` —— 那个中文名住在套件根的 `labels.ts`，
 **不在这里重抄一份**（抄一份就是两份真相）。
@@ -130,36 +131,20 @@
 | 模板 | 做什么 |
 | --- | --- |
 | `Scene` | 单场景脚手架：`Stage` → `SafeArea` → 内容列（不用母版时） |
-| `ShowcaseScenes` | **母版演示与主题演示共用的内容**（6 个版式的最坏情况内容 ＋ **8 场** ＋ 家具 hook；`list` 演练三遍：不带主字段 / 带主字段 / 显式节奏对照） |
-| `KitShowcase` | 组件层演示 / 验证载体：每个原语都摆了一遍，**18 个场景 1200 帧** |
-| `MasterShowcase` | 母版层演示 / 验证载体：默认主题 + **6 个版式**（**8 场** —— `list` 三遍）的抽帧清单 |
+| `ShowcaseScenes` | **母版演示与主题演示共用的内容**：每个版式的最坏情况内容 ＋ 家具 hook（`list` 演练三遍：不带主字段 / 带主字段 / 显式节奏对照） |
+| `KitShowcase` | 组件层演示 / 验证载体：每个原语都摆了一遍 |
+| `MasterShowcase` | 母版层演示 / 验证载体：默认主题 + 每个版式的抽帧清单 |
 | `ThemeShowcase` | 主题层演示 / 验证载体：**同一份内容**换主题跑，用于并排对比 |
 
 ### 组件（契约原语）
 
-| 组件 | 做什么 | 关键 props |
-| --- | --- | --- |
-| `Title` | 主标题，透明度 + 上移入场 | `text` `fontSize` `delayInFrames` `enterDurationInFrames` `align` |
-| `Subtitle` | 副标题 / 支撑文字，位移更小 | 同上（默认更缓） |
-| `TextReveal` | 逐行揭示，每行装在遮罩里向上推出 | `lines` `staggerInFrames` `lineDurationInFrames` |
-| `Emphasis` | 关键词强调：`highlight` 底色块 / `underline` 下划线 / `box` 圈框 | `kind` `color` `delayInFrames` `thickness` |
-| `BulletList` | 要点列表，逐条错开入场 | `items` `staggerInFrames` `bulletColor` |
-| `Quote` | 引用卡：大引号 + 引文 + 出处 | `text` `attribution` `maxWidth` |
-| `SectionHeading` | 章节标题：编号 + 标题 + 生长分隔线 | `index` `title` |
-| `ProgressBar` | 进度指示条，填充用 `scale` 生长 | `progress`（由调用方内联算出） |
-| `SafeArea` | 安全区容器，按画布缩放 | `insetX` `insetY` `align` |
-| `Stage` | 舞台：背景色 + 可选网格 + 可选暗角 | `grid` `vignette` `background` |
-| `MediaStage` | 多媒体框：**安全区内放得下的最大 16:9**，放图片 / 视频 / 自绘内容 | `src` `kind` `fit` `label` `labelPlacement` |
-| `MediaCard` | 迷你多媒体框：按 `focus` 长大并移到目标矩形 | `from` `to` `focus` `labelPlacement` |
-| `ScrollArea` | 滚动区：裁切视口 + 按 `scroll` 平移内容（视频里没有「滚动」这个动作）；`onMeasured` 交出量到的 `{viewport, content}`，锚点算式用 `anchorScroll` | `scroll` `header` `rail` `onMeasured` |
-| `TextTag` | 文字标签：一小段文字装在盒子里，四种分量从实底到中性 | `text` `tone` `fontSize` `radius` |
-| `RichTextBox` | 富文本框：一段正文里混排加粗 / 高亮 / 等宽，格式写在同一个字符串里 | `text` `box` `fontSize` `align` |
-| `BarChart` | 水平条形图：一行一个类别，条长编码数值 | `items` `max` `barHeight` `unit` `decimals` |
-| `Panel` | 内容卡：有边界的容器，头 / 身 / 尾三段槽；**框高跟内容走**，讲到别处时可压暗 | `width` `header` `footer` `padding` `shadow` `dim` |
-| `Stat` | 大数字：一个数据点（数字 + 单位 + 标签），三段错开入场；单位**按基线**对齐；支持逐位滚动 | `value` `unit` `label` `note` `fontSize` `align` `reserveChars` `rollFrom` `roll` |
+**挑原语的顺序**：文字类（标题 / 副标题 / 章节标题 / 要点 / 引用 / 强调）→ 媒体类
+（`MediaStage` 框去适应素材 · `MediaCard` 小框长大 · `ScrollArea` 框不动、内容按帧平移）→
+结构类（`Panel` 内容撑开框 · `Flow` 排列容器）→ 数据类（`Stat` / `BarChart` / `ProgressBar`）。
+`SafeArea` / `Stage` 是布局脚手架，故意不做成可交互元素。
 
-`SafeArea` 与 `Stage` 是布局脚手架，故意不做成可交互元素。
-**所有原语的颜色与字族都从 `useTheme()` 取**，所以它们跟着主题走。
+**清单与 props 以 `components/specs.tsx` 为准** —— 展示页按它渲染元素墙，本目录不复述（复述就是第二份真相）。
+所有原语的颜色与字族都从 `useTheme()` 取，所以它们跟着主题走。
 
 ### 母版版式
 
