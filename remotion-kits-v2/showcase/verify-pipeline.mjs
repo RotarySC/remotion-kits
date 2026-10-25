@@ -69,14 +69,14 @@ let watcher,
 async function state() {
   return (await fetch(url + '/__showcase_status')).json();
 }
-async function until(fn, label) {
+async function until(fn, label, interval = 400) {
   const end = Date.now() + 90000;
   while (Date.now() < end) {
     try {
       const result = await fn();
       if (result) return result;
     } catch {}
-    await wait(400);
+    await wait(interval);
   }
   throw new Error('等待超时 ' + label + '\n' + watchLog.slice(-12000));
 }
@@ -264,11 +264,12 @@ try {
         .getAttribute('aria-pressed')) === 'true',
   );
   await wait(4200);
+  const settledAfterAdd = await state();
   check(
     '同一次修改没有重复发布',
     (await current(out)).buildId === added.buildId &&
-      (await state()).phase === 'ready' &&
-      !(await state()).pending,
+      settledAfterAdd.phase === 'ready' &&
+      !settledAfterAdd.pending,
   );
   await fs.writeFile(
     specFile,
@@ -344,37 +345,83 @@ try {
     body: JSON.stringify({key: 'arbitrary-outside-path'}),
   });
   check('演示服务不提供来源切换接口', rejected.status === 404);
-  await fs.writeFile(flowFile, Buffer.concat([watchedBytes, Buffer.from('\n// concurrent A\n')]));
-  await until(async () => (await state()).phase === 'building', '构建期间修改的起点');
-  const inFlightDigest = await digest({project: runtime, source, suite: ''});
-  await until(
-    async () =>
-      (await fs.readdir(path.join(out, 'builds'))).some((name) =>
-        name.startsWith(inFlightDigest.slice(0, 12)),
-      ),
-    '来源快照已读完，候选目录已建立',
-  );
-  await fs.writeFile(flowFile, Buffer.concat([watchedBytes, Buffer.from('\n// concurrent B\n')]));
-  await until(async () => {
-    const s = await state();
-    return (
-      s.phase === 'ready' &&
-      !s.pending &&
-      (await current(out)).sourceDigest === (await digest({project: runtime, source, suite: ''}))
+  // 构建期间改来源：写 A → 等候选目录出现 → 写 B，让改动压在在飞构建里。
+  // 两个时序点都可能被负载拖慢：轮询错过候选窗口时，改动会落在发布之后（guard 不触发），
+  // 这次观测就无效 —— 重试，不把轮询时序当成结论。
+  const guardHits = () => (watchLog.match(/构建期间来源再次变化/g) ?? []).length;
+  let inFlight = null,
+    converged,
+    digressed = [],
+    attempts = 0;
+  while (!inFlight && attempts < 3) {
+    attempts++;
+    const guardsBefore = guardHits();
+    await fs.writeFile(
+      flowFile,
+      Buffer.concat([watchedBytes, Buffer.from(`\n// concurrent A${attempts}\n`)]),
     );
-  }, '构建期间的新修改最终同步');
-  check('中途变更的过时候选没有发布', watchLog.includes('构建期间来源再次变化；候选结果未发布'));
+    await until(async () => (await state()).phase === 'building', '构建期间修改的起点');
+    const inFlightDigest = await digest({project: runtime, source, suite: ''});
+    const candidate = await until(
+      async () =>
+        (await fs.readdir(path.join(out, 'builds'))).find((name) =>
+          name.startsWith(inFlightDigest.slice(0, 12)),
+        ),
+      '来源快照已读完，候选目录已建立',
+      80,
+    );
+    const publishedAtWrite = await current(out);
+    await fs.writeFile(
+      flowFile,
+      Buffer.concat([watchedBytes, Buffer.from(`\n// concurrent B${attempts}\n`)]),
+    );
+    // 一次等待同时确认空闲与一致，并记录期间出现过的每次「发布摘要 ≠ 当前来源」。
+    // 不在等待之后再读一次摘要来比对：两次分开读之间的窗口正是这条断言先前偶发红的位置。
+    // 监听没反应过就谈不上「吞掉」：写入落盘到事件到达之间，页面仍停在上一个版本。
+    let acknowledged = false;
+    digressed = [];
+    converged = await until(async () => {
+      const s = await state();
+      if (s.phase !== 'ready' || s.pending) {
+        acknowledged = true;
+        return null;
+      }
+      const published = await current(out);
+      if (!published) return null;
+      const actual = await digest({project: runtime, source, suite: ''});
+      if (published.sourceDigest !== actual) {
+        if (acknowledged)
+          digressed.push({
+            published: published.buildId,
+            digest: published.sourceDigest.slice(0, 12),
+            actual: actual.slice(0, 12),
+          });
+        return null;
+      }
+      return acknowledged ? {published, actual} : null;
+    }, '构建期间的新修改最终同步');
+    if (publishedAtWrite?.buildId !== candidate && guardHits() > guardsBefore) inFlight = candidate;
+  }
+  check('中途变更的过时候选没有发布', !!inFlight, {尝试次数: attempts, 过时候选: inFlight});
   check(
     '构建期间的新修改没有被失败摘要吞掉',
-    (await current(out)).sourceDigest === (await digest({project: runtime, source, suite: ''})),
+    !!inFlight && digressed.length === 0 && converged.published.buildId !== inFlight,
+    {
+      尝试次数: attempts,
+      过时候选: inFlight,
+      已发布: converged.published.buildId,
+      发布摘要: converged.published.sourceDigest.slice(0, 12),
+      来源摘要: converged.actual.slice(0, 12),
+      等待期间的分歧: digressed.slice(0, 5),
+    },
   );
   const settled = await current(out);
   await wait(4200);
+  const quiet = await state();
   check(
     '追赶完成后监听恢复稳定',
-    (await current(out)).buildId === settled.buildId &&
-      (await state()).phase === 'ready' &&
-      !(await state()).pending,
+    (await current(out)).buildId === settled.buildId && quiet.phase === 'ready' && !quiet.pending,
+    quiet,
   );
   check('最终摘要新鲜', (await run(['--check'])).code === 0);
   const structure = await verifyStructure(page, url, root);
