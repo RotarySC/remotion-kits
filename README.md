@@ -2,10 +2,6 @@
 
 把「**一类视频需求**」沉淀成「**一套可复用组件**」：**一个内核**（主题 / 母版 / 原语 / 护栏）＋**若干类型包**（只放差异），外加一个**展示页**，让每个组件真的渲染出来给人看，而不是读代码描述。
 
-> **本仓库只装框架本身。** 设计文档、裁定记录、逐轮证据与具体片子工程留在作者的工作区（见 `.gitignore` 第一组）。
-> 所以下文与 [`remotion-workflow.md`](remotion-workflow.md) 里出现的 `docs/…`、`remotion-kit-lab/`、
-> `hotspot-zcode/`、`unrelated/hf-promo/` 是**工作区坐标**，在 clone 出来的仓库里**不解析**。
-
 ## 能力
 
 | 能力 | 说明 |
@@ -31,13 +27,13 @@
 
 ## 安装与启动
 
-前置条件（本机实测值，2026-10-25）：
+前置条件（2026-10-25 实测）：
 
 | 条件 | 事实 |
 | --- | --- |
 | Node / npm | v24.18.0 / 11.16.0；`npm ping --fetch-retries=0 --fetch-timeout=15000` 现测 **2.4 s PONG** |
 | PowerShell | 7.6.8 |
-| Chromium 内核 | **只有 Edge**：`C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe`（156.0.4314.42）。本机**没有 Chrome**，不探测就 `still` / `render` 全失败 |
+| Chromium 内核 | **只有 Edge**：`C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe`（156.0.4314.42）。**没有 Chrome**，不探测就 `still` / `render` 全失败 |
 | 中文字体 | `msyh.ttc` · `msyhbd.ttc` · `simhei.ttf` · `simsun.ttc` · `consola.ttf` · `arial.ttf` 均在 `C:\Windows\Fonts` |
 | 依赖工程 | 一个已装 react / remotion / typescript / esbuild 的 Remotion 工程；展示页与各工程共用同一棵依赖树（junction） |
 
@@ -45,7 +41,7 @@
 # 1) 内核＋该类型包一起装（类型包自己没有原语，缺了编译不过）
 pwsh -File remotion-kits-v2\tools\update-kits.ps1 -Project <工程根> -Install
 
-# 2) 复用依赖树（本机做法）。删 junction 用 cmd /c rmdir，别用 Remove-Item -Recurse
+# 2) 复用已有依赖树（可选）。删 junction 用 cmd /c rmdir，别用 Remove-Item -Recurse
 New-Item -ItemType Junction -Path <工程根>\node_modules -Target <已有依赖树>\node_modules
 
 # 3) 类型检查与合成清单 —— 必须在工程根执行
@@ -131,8 +127,8 @@ pwsh -File remotion-kits-v2\showcase\generate.ps1 -Project <依赖工程> -WithI
 ### 镜像同步（改过 `kits/**` 或 `references/**` 之后）
 
 ```powershell
-pwsh -NoProfile -File tools\mirror-check.ps1     # 母本 ↔ 仓库镜像：113/113 全等才可提交
-pwsh -NoProfile -File tools\kit-copy-check.ps1   # 母本 / 仓库 / lab / zcode 四副本
+pwsh -NoProfile -File tools\mirror-check.ps1     # 母本 ↔ 仓库快照：退出码 0（逐文件全等）才可提交
+pwsh -NoProfile -File tools\kit-copy-check.ps1   # 母本 / 仓库 / 各工程副本的 SHA256
 ```
 
 ⚠️ 同步是**复制覆盖 ＋ 删掉多出来的文件**，绝不「删除 ＋ 改名」：技能目录被热重载监视，`Remove-Item -Recurse` 会撞文件锁，结果是目录删不掉、文件已删光。
@@ -154,7 +150,7 @@ pwsh -NoProfile -File tools\kit-copy-check.ps1   # 母本 / 仓库 / lab / zcode
 ```powershell
 # 1) 类型与合成清单（在工程根；期望 tsc 退出码 0，合成条数符合预期）
 Push-Location <工程根>; & .\node_modules\.bin\tsc.cmd --noEmit; & .\node_modules\.bin\remotion.cmd compositions; Pop-Location
-# 若环境不允许派生子进程，类型检查可以绕开 .cmd 包装直跑（本机实测 exit 0 / 4.9 s）：
+# 若环境不允许派生子进程，类型检查可以绕开 .cmd 包装直跑（实测 exit 0 / 4.9 s）：
 # node .\node_modules\typescript\bin\tsc --noEmit
 
 # 2) 套件发现（不构建页面；期望退出码 0、无 WARN）
@@ -171,7 +167,7 @@ node remotion-kits-v2\showcase\verify-structure.mjs  http://127.0.0.1:18499/ --p
 node remotion-kits-v2\showcase\verify-workbench.mjs  http://127.0.0.1:18499/ --playwright <Playwright包> --out <证据目录>
 node remotion-kits-v2\showcase\verify-pipeline.mjs   --project <依赖工程> --work <新目录> --playwright <Playwright包>
 
-# 5) 本机发布判据
+# 5) 仓库一致性判据（有母本或工程副本时才跑；全新 clone 可跳过）
 pwsh -NoProfile -File tools\mirror-check.ps1
 pwsh -NoProfile -File tools\kit-copy-check.ps1
 git diff --check
@@ -191,7 +187,7 @@ git diff --check
 | --- | --- |
 | **Studio 里 0 格动画可编辑** | 2026-10-05 实测 42 个 `Interactive.*`：`static` **148** · `keyframed` **0** · `computed` **230**。元件层成因是 `interpolate` 的 range 里有变量运算；母版层是 `easing` 里展开 `Easing.bezier(...)`。判定**逐格、不连坐** |
 | schema 面板 | 本地 4.0.523 **能用**，但面板在右侧栏、默认收起（`Ctrl+J`）；只放开「调用处能就地解析成静态值」的字段：字面量 ✅ · 裸模块常量 ✅ · 常量下标 ❌ · 实例局部变量 ❌ · 帧相关表达式 ❌。写回改的是**调用处的 JSX attribute**，保存有延迟 |
-| 浏览器 | 本机只有 Edge；不探测并 `setBrowserExecutable` 就 still / render 全失败 |
+| 浏览器 | 只有 Edge；不探测并 `setBrowserExecutable` 就 still / render 全失败 |
 | 子进程 | `remotion` 会派生 esbuild 与 Edge；受限环境（本沙箱）报 **`spawn EPERM`**，必须换到允许子进程的终端跑（`tsc` 不受影响） |
 | `frame 0` | 所有元素 opacity 全 0，别用 frame 0 判「是不是空白」 |
 | `from` | 已是**入场时间原点**；旧的 `from` ＋ `delayInFrames` 会推两遍（2026-10-06 已修） |
@@ -207,6 +203,6 @@ git diff --check
 
 **未验证 / 未做**：
 
-- 套件更新后的**整片渲染重跑**没做过：工作区那支成片仍是 2026-09-20 渲染的，改动与画面等价是结构推断，没有整片帧哈希封过。
+- 套件更新后的**整片渲染重跑**没做过：目前「改动与画面等价」是结构推断，没有对整片做帧哈希封样。
 - 展示页的 GPU 性能基准没跑过；`-WithImages` 静帧抽取本轮未重跑（46 张是 2026-10-08 的）。
 - 本文件（2026-10-25）只改文档，但 `tsc`、展示页构建与四个 verify 入口都已重跑，读数见「自验」；母版边界与多类型包夹具两组（11 / 118 项）本轮未重跑。

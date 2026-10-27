@@ -83,7 +83,7 @@ flowchart LR
 
 先定叙事，再实现动效。每个场景写 `sceneId`、叙事作用、旁白或屏幕文案、视觉说明、素材 ID、事实 ID 和预计时长。开场要建立问题，主体按观众理解所需的顺序展开，结尾完成约定的信息或行动；不以“镜头数量”代替信息完整性。
 
-按 `remotion-kits` 的 `references/catalog.md` 查已有套件。能覆盖的信息形态直接复用；确实缺版式、家具或主题时才扩展套件。使用套件的项目按工作区约定让场景调用版式、出片走 `MasterFrame`，并按版式抽帧。只有项目本身需要新视觉身份时才新增 `design.md`；已有品牌规范或套件主题直接沿用，并在 brief 中指向其依据。
+按 `remotion-kits` 的 `references/catalog.md` 查已有套件。能覆盖的信息形态直接复用；确实缺版式、家具或主题时才扩展套件。使用套件的项目按套件约定让场景调用版式、出片走 `MasterFrame`，并按版式抽帧。只有项目本身需要新视觉身份时才新增 `design.md`；已有品牌规范或套件主题直接沿用，并在 brief 中指向其依据。
 
 ### 阶段 3：音频与媒体
 
@@ -181,14 +181,9 @@ video-job/
 
 冻结是为了保证一轮验证面对同一组输入，并非禁止修改。修改发生时更新受影响的产物与清单状态，避免“新脚本配旧音频”或“新时间轴配旧字幕”。
 
-## 5. 本工作区运行方式
+## 5. 运行方式
 
-> ⚠️ **本节描述的是「本机工作区」，而它比本仓库大。** 仓库里只有 `remotion-kits-v2/`（套件与展示页）、
-> `tools/`（维护工具）和根目录这两份 md。下面点到的 `remotion-kit-lab/`、`hotspot-zcode/`、`docs/`、
-> `.shots/`、`unrelated/` **都不在仓库里** —— 它们是判据与物证的产地，留在本机。所以那些相对路径在
-> clone 出来的仓库里**不解析**：它们是**工作区坐标**，不是仓库内的链接。
-
-在**工程根目录**执行 Remotion CLI；它从当前目录寻找入口。下面的命令是操作形状，具体合成 ID、文件名与项目脚本取当前工程实际值。`remotion-kit-lab` 当前锁定 `4.0.523`，新项目先查看自身 `package.json` 与 `remotion versions`，不要把这个版本当作永久常量。网络与浏览器等可变环境事实及复测命令见 [README.md](README.md)「安装与启动」与「自验」。
+在**工程根目录**执行 Remotion CLI；它从当前目录寻找入口。下面的命令是操作形状，具体合成 ID、文件名与项目脚本取当前工程实际值。框架实测在 `4.0.523`；新工程先看自己 `package.json` 与 `remotion versions`，别把这当永久常量。网络与浏览器等可变环境事实及复测命令见 [README.md](README.md)「安装与启动」与「自验」。
 
 ```powershell
 $projectRoot = 'C:\path\to\video-job'
@@ -205,43 +200,26 @@ Push-Location $projectRoot
 Pop-Location
 ```
 
-新建项目时，先按 `remotion-create` 选择脚手架与目录；既有工程优先复用依赖与配置。此机的 `remotion.config.ts` 要探测 Edge 并设置 `angle`，具体样例见 `remotion-kit-lab/remotion.config.ts`。`remotion` 抽帧与渲染会派生 esbuild 和 Edge；若受限环境报 `spawn EPERM`，在允许子进程的环境中重跑，不能把该错误归为合成代码缺陷。
+新建项目时，先按 `remotion-create` 选择脚手架与目录；既有工程优先复用依赖与配置。`remotion.config.ts` 要探测 Edge 并设置 `angle`。`remotion` 抽帧与渲染会派生 esbuild 和 Edge；若受限环境报 `spawn EPERM`，在允许子进程的环境中重跑，不能把该错误归为合成代码缺陷。
 
 脚手架示例：在适合创建新工程的父目录运行 `npx create-video@latest --yes --blank --no-tailwind video-job`，然后进入 `video-job`。先按 [README.md](README.md)「安装与启动」里的 `npm ping` 复测 npm 可达性。
 
-> ⚠️ 原句还指到「[原技能体系文档](remotion-workflow.md) §2、§4」—— 那是**重写前**那份
-> `docs/remotion-workflow.md`（**633 行 / 15 节**），本文取代了它，所以那个链接**指回了自己**。
-> 那份旧文**不在本仓库里**（它只活在本机的历史快照归档里，而那种归档不进版本库）。
-> 旧文 §13「实例对照：本工作区」在重写时被丢掉，**下面一节把它补回来了**。
+### 套件在工程里的形态
 
-### 实例对照：本工作区
+工程里拿到的是**版本化源码快照**，不是 npm 依赖：`<工程>/src/kits/` 与套件源码逐字节相同。
+更新走 [`remotion-kits-v2\tools\update-kits.ps1`](remotion-kits-v2/tools/update-kits.ps1)（**默认只报告**，`-Apply` 才写），
+判据是 `<工程>\.kit-origin\` 里的基线 —— 基线记着「上次复制过来的字节」，用来区分
+「上游改了（可以安全重刷）」与「这个工程自己改过（绝不碰）」。
 
-本工作区里的套件有**四份**，判据是**逐字节一致**（`pwsh tools\mirror-check.ps1` 退出码 0）：
+两份一致性判据：`tools\mirror-check.ps1`（技能母本 ↔ 仓库里这份快照，逐文件哈希）与
+`tools\kit-copy-check.ps1`（母本 / 仓库 / 各工程副本的 SHA256）。退出码 0 才是全等。
 
-| 位置 | 是什么 |
-| --- | --- |
-| `~\.dsh\skills\remotion-kits\` | **技能母本** —— 改动的家 |
-| `remotion-kits-v2/` | 母本的**镜像**（版本库里那一份） |
-| `remotion-kit-lab/` | **验证测试台** —— 夹具与展示页在这里验 |
-| `hotspot-zcode/production/` | **真实成片工程** —— 工作区里唯一走 Remotion 的片子 |
-
-工程副本拿到的是**版本化源码快照**（不是技能安装）：`<工程>/src/kits/` 与母本逐字节一致，
-更新走 [`remotion-kits-v2\tools\update-kits.ps1`](remotion-kits-v2/tools/update-kits.ps1)（**默认只报告**，`-Apply` 才写；
-判据是 `<工程>\.kit-origin\` 里的基线）。⚠️ **更新器住在技能侧**（`remotion-kits-v2\tools\`），**不在**仓库根的
-`tools\` —— 后者是工作区的维护工具，里面没有更新器。
-
-> 工作区里还有一支 `unrelated/hf-promo/`：**不是 Remotion** —— 它走 `npx hyperframes@0.8.47` 的
-> `dev` / `check` / `render` / `publish`，另有自己的 `BRIEF.md` 与 `AGENTS.md`。
-> 本节讲的是 Remotion 这条路，**不覆盖它**。
-
-**每个工程自己的读数（合成条数、帧数、ffprobe 规格、抽帧抓到的缺陷）写在工程自己的文档里**，
-不在本文复制 —— 复制过来就会漂。真片那次的交付与验收记录见 `hotspot-zcode/` 根下的
-`OUTPUT.md` / `VERIFICATION.md`（工作区坐标，clone 后不解析）。
+**每个工程自己的读数（合成条数、帧数、ffprobe 规格、抽帧抓到的缺陷）写在那工程自己的文档里**，
+不在本文复制 —— 复制过来就会漂。
 
 > **两条边界**：「元素能不能用、能怎么调」归套件展示页（输入是最坏情况夹具）；
 > 「这一期的画面成不成立」归制作侧抽帧（输入是本期真实文案）。判据不在分工偏好，在数据上 ——
 > 真实成片抽帧抓到的缺陷里，多数属于**内容层**，展示页**原理上**覆盖不到。
-
 
 ## 6. 按需查阅
 
@@ -249,7 +227,7 @@ Pop-Location
 | --- | --- |
 | 从模糊想法确定体裁、brief 与执行模式 | 技能 `remotion-intent` 的 `SKILL.md` 与 `references/brief-format.md` |
 | 复用、扩展或回归套件 | 技能 `remotion-kits` 的 `SKILL.md`、`references/catalog.md`、目标套件 `kit.md`；仓库里那一份在 [`remotion-kits-v2/`](remotion-kits-v2/) |
-| 本机 Edge、字体、CLI、抽帧与验收判据 | [README.md](README.md)「安装与启动」·「自验」·「已知限制与未验证项」 |
+| Edge、字体、CLI、抽帧与验收判据 | [README.md](README.md)「安装与启动」·「自验」·「已知限制与未验证项」 |
 | 当前 API 或升级 | `remotion-docs`、`remotion-upgrade` 与项目锁定版本的官方文档 |
 
 以上文件是参考与契约，不替代用户当前任务要求。若规则冲突，先核对项目实际版本、当前用户要求和目标技能的适用范围，并在执行记录中说明采用的决定。
