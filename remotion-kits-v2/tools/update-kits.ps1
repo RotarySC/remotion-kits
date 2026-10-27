@@ -172,7 +172,7 @@ function Write-Human([string]$text, [string]$color = '') {
 function Stop-Usage([string]$m) { [Console]::Error.WriteLine($m); exit $E_USAGE }
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 1 · 通用小工具（PowerShell 的坑集中在这里，见 AGENTS §1.8）
+# 1 · 通用小工具（PowerShell 的坑集中在这里）
 # ─────────────────────────────────────────────────────────────────────────────
 
 function Get-RelSorted([string]$Root) {
@@ -340,7 +340,7 @@ function Test-Contained([string]$Root, [string]$Path) {
 
 function Test-NotLink([string]$Path) {
   # 「不跟随链接跳转」：目标是链接就拒绝 —— `Remove-Item -Recurse` 顺着 junction 删掉**目标**目录
-  # 的内容，这条在本工作区已经付出过一次代价（AGENTS §1.8）。
+  # 的内容，这条已经付出过一次代价。
   if (-not (Test-Path -LiteralPath $Path)) { return $true }
   $it = Get-Item -LiteralPath $Path -Force
   return (-not $it.LinkType)
@@ -485,7 +485,7 @@ function Get-ManifestDoc($mf) {
     if ($e.ContainsKey('acceptedFrom') -and $e.acceptedFrom) { $entry['acceptedFrom'] = $e.acceptedFrom }
     if ($e.ContainsKey('history') -and $e.history -and $e.history.Count -gt 0) {
       # 只留最近 8 条：历史说明「这个路径发生过什么」，不是审计流水；无限长会把清单变成垃圾场。
-      # 注意：`$h` 是 List[object]，**不能**用 `@()` 套它（见 AGENTS §1.8 第一条）。
+      # 注意：`$h` 是 List[object]，**不能**用 `@()` 套它。
       $h = $e.history
       if ($h.Count -gt 8) { $h = $h[($h.Count - 8)..($h.Count - 1)] }
       $entry['history'] = @(foreach ($x in $h) { [ordered]@{ at = $x.at; event = $x.event } })
@@ -872,7 +872,7 @@ function Get-RunRecordPath([string]$runId) { return (Join-Path (Join-Path (Get-R
 
 function Get-RunRecords() {
   # 目录名带时间戳前缀 ⇒ 按名字排序就是时间序（同一毫秒再撞就退化成随机序，可接受）。
-  # ⚠️ 返回 `[object[]]`，**不是** List[object]：调用方一用 `@()` 套 List 就必定抛（AGENTS §1.8）。
+  # ⚠️ 返回 `[object[]]`，**不是** List[object]：调用方一用 `@()` 套 List 就必定抛。
   $list = New-Object System.Collections.Generic.List[object]
   $root = Get-RunsRoot
   if (Test-Path -LiteralPath $root) {
@@ -1444,7 +1444,7 @@ function Restore-FromJournal($st, [string]$planDir, $journal, [string]$phaseStat
   $beforeDir = Join-Path $planDir 'before'
   $stagedRoot = Join-Path $planDir 'staged'
   $hasPre = ([int](Get-Prop $journal 'journalFormatVersion' 1)) -ge 2
-  # 不写 `@($journal.steps)`：它可能是 List[object]，`@()` 套上去必定抛（AGENTS §1.8）。
+  # 不写 `@($journal.steps)`：它可能是 List[object]，`@()` 套上去必定抛。
   $steps = $journal.steps
   for ($i = $steps.Count - 1; $i -ge 0; $i--) {
     $step = $steps[$i]
@@ -2410,7 +2410,7 @@ switch ($mode) {
     # 部分更新（写了无歧义的那半）是完全不同的后果。混着说就是让收尾语盖掉事实。
     #
     # ⚠️ 变量名**不能**叫 `$refused` / `$partial` 之外的近似参数名：`$partial` 会**覆盖 `-Partial`
-    # 这个 switch 参数**（变量不区分大小写，AGENTS §1.8 第二条），报「无法将 Int32 转换为
+    # 这个 switch 参数**（变量不区分大小写），报「无法将 Int32 转换为
     # SwitchParameter」，整段收尾语静默不打 —— 实测踩过。函数内部的同名局部是安全的
     # （函数有自己的作用域），**脚本作用域顶格**才出事。
     $kitsRefused = @($kitResults | Where-Object { $_.state -eq 'unresolved' }).Count

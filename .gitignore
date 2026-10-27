@@ -28,6 +28,10 @@ remotion-main/
 .backup/
 .superpowers/
 
+# 本机代理约定与它的历史维护脚本 —— 只约束在这台机器上干活的人，仓库读者用不上
+/AGENTS.md
+/tools/agents-*.cjs
+
 # 生成物：一条命令就能重出
 .showcase-live/
 **/dist/

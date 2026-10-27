@@ -218,7 +218,7 @@ export const Stage: React.FC<{
                             为什么必须补：场景层渲染的是套件的 `KitShowcase`，里面可能有
                             `<OffthreadVideo>`（多媒体框的 `kind: 'video'` 分支）。它要读
                             `SharedAudioContext` 与 `MediaVolumeContext` —— 缺一个就**整页抛异常、白屏**
-                            （实测三次，每次报错名都不一样，见 `AGENTS.md` §1.3）。
+                            （实测三次，每次报错名都不一样）。
 
                             画廊是**静音预览**：`audioEnabled={false}`、`mediaVolume: 0`、`playerMuted: true`。
                             它照样提供那些 context 对象，只是不真的建 AudioContext。 */}

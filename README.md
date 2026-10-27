@@ -17,11 +17,11 @@
 | 展示页 | 画廊 · 工作台（真实夹具＋主题＋临时试验）· 内容对照 · 全局搜索；**自动发现**资产，不手写清单 |
 | 更新器 | [`update-kits.ps1`](remotion-kits-v2/tools/update-kits.ps1)：按 `.kit-origin` 基线把母本改动刷进工程副本，**默认只报告** |
 | 契约 8 份 | [`references/`](remotion-kits-v2/references/)：主题 / 母版 / 组件 / 创作 / 改造 / 入库 / 渲染档 / 目录 |
-| 维护工具 12 | [`tools/`](tools/)：镜像与四副本哈希比对 · 套件盘点 · 基线修剪 · 抽帧修剪 · AGENTS 搬运与校验 · 架构草图 · Studio 护栏打/撤 |
+| 维护工具 | [`tools/`](tools/)：镜像与多副本哈希比对 · 套件盘点 · 基线修剪 · 抽帧修剪 · 架构草图 · Studio 护栏打/撤 · 别名探测 · 帧差 |
 
 **组织方式**：内核 **58** 个文件全系统只有一份；类型包 **17** 个文件只放差异，运行时靠自己的 `master/MasterFrame.tsx` 适配器把「内核引擎 ＋ 本套件家具」组合起来，调用方接口不变。
 
-**规模**（2026-10-25 现测）：仓库 **137** 个文件 ＝ [`remotion-kits-v2/`](remotion-kits-v2/) **113**（`kits/` 75 ＝ kernel 58 ＋ hotspot 17 · `references/` 8 · `showcase/` 25 · `tools/` 4）＋ [`tools/`](tools/) 19 ＋ 根 5。
+**规模**（2026-10-27 现测）：仓库 **133** 个文件 ＝ [`remotion-kits-v2/`](remotion-kits-v2/) **113**（`kits/` 75 ＝ kernel 58 ＋ hotspot 17 · `references/` 8 · `showcase/` 25 · `tools/` 4）＋ [`tools/`](tools/) 16 ＋ 根 4。
 
 **分发是版本化源码复制，不是共享依赖**：套件被复制进工程，工程可以就地改；要跟随上游更新就跑更新器。它靠 `<工程>/.kit-origin/` 里的**基线**分清「上游改了」与「你为这支片子改过」—— 没有基线，这两件事长得一模一样。
 
@@ -143,7 +143,6 @@ pwsh -NoProfile -File tools\kit-copy-check.ps1   # 母本 / 仓库 / 各工程�
 | 某个套件能干什么、已知限制 | [`kits/kernel/kit.md`](remotion-kits-v2/kits/kernel/kit.md) · [`kits/hotspot/kit.md`](remotion-kits-v2/kits/hotspot/kit.md) |
 | 展示页设计与验收断言 | [`showcase/README.md`](remotion-kits-v2/showcase/README.md) · [`showcase/DESIGN.md`](remotion-kits-v2/showcase/DESIGN.md) |
 | 从需求到成片的八阶段主线 | [`remotion-workflow.md`](remotion-workflow.md) |
-| 本仓库的文档纪律与提交前自检 | [`AGENTS.md`](AGENTS.md) |
 
 ## 自验
 

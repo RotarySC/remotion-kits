@@ -91,7 +91,7 @@ export type LayoutSpec<N extends string = LayoutName> = {
  * 这个问题的答案就不再是「要说什么」，而是「要说什么 ＋ 怎么排」。
  *
  * 消费方（场景类型 / 槽声明审计器）拿这份声明**先把两类分开，再各自比对** ——
- * 分开之前比，会得到一个看起来像缺陷的读数（T09 材料里就发生过一次，见 AGENTS）。
+ * 分开之前比，会得到一个看起来像缺陷的读数（T09 材料里就发生过一次）。
  *
  * ⚠️ 今天只有 `staggerInFrames` 一个。它**跨两侧**存在（内核的 `ListLayout` 与类型包的
  * `TimelineLayout` / `StanceLayout` / `MultiStatLayout`），所以这份声明住在**内核**；
