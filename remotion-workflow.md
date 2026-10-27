@@ -185,7 +185,7 @@ video-job/
 
 > ⚠️ **本节描述的是「本机工作区」，而它比本仓库大。** 仓库里只有 `remotion-kits-v2/`（套件与展示页）、
 > `tools/`（维护工具）和根目录这两份 md。下面点到的 `remotion-kit-lab/`、`hotspot-zcode/`、`docs/`、
-> `.shots/`、`hf-promo/` **都不在仓库里** —— 它们是判据与物证的产地，留在本机。所以那些相对路径在
+> `.shots/`、`unrelated/` **都不在仓库里** —— 它们是判据与物证的产地，留在本机。所以那些相对路径在
 > clone 出来的仓库里**不解析**：它们是**工作区坐标**，不是仓库内的链接。
 
 在**工程根目录**执行 Remotion CLI；它从当前目录寻找入口。下面的命令是操作形状，具体合成 ID、文件名与项目脚本取当前工程实际值。`remotion-kit-lab` 当前锁定 `4.0.523`，新项目先查看自身 `package.json` 与 `remotion versions`，不要把这个版本当作永久常量。网络与浏览器等可变环境事实及复测命令见 [README.md](README.md)「安装与启动」与「自验」。
@@ -230,7 +230,7 @@ Pop-Location
 判据是 `<工程>\.kit-origin\` 里的基线）。⚠️ **更新器住在技能侧**（`remotion-kits-v2\tools\`），**不在**仓库根的
 `tools\` —— 后者是工作区的维护工具，里面没有更新器。
 
-> 工作区里还有一支 `hf-promo/`：**不是 Remotion** —— 它走 `npx hyperframes@0.8.47` 的
+> 工作区里还有一支 `unrelated/hf-promo/`：**不是 Remotion** —— 它走 `npx hyperframes@0.8.47` 的
 > `dev` / `check` / `render` / `publish`，另有自己的 `BRIEF.md` 与 `AGENTS.md`。
 > 本节讲的是 Remotion 这条路，**不覆盖它**。
 

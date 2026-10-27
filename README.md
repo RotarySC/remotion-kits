@@ -4,7 +4,7 @@
 
 > **本仓库只装框架本身。** 设计文档、裁定记录、逐轮证据与具体片子工程留在作者的工作区（见 `.gitignore` 第一组）。
 > 所以下文与 [`remotion-workflow.md`](remotion-workflow.md) 里出现的 `docs/…`、`remotion-kit-lab/`、
-> `hotspot-zcode/`、`hf-promo/` 是**工作区坐标**，在 clone 出来的仓库里**不解析**。
+> `hotspot-zcode/`、`unrelated/hf-promo/` 是**工作区坐标**，在 clone 出来的仓库里**不解析**。
 
 ## 能力
 

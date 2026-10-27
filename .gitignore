@@ -8,17 +8,16 @@
 # docs/           设计与裁定记录、细节档案、证据图（2026-10-21 起不进仓库）
 # remotion-kit-lab/   基线验证工程（含 128 MB 抽帧物证）
 # hotspot-zcode/      真实成片工程（含成片与工程副本）
-# hf-promo/           另一支宣传片 —— 走 hyperframes，不是 Remotion
 # .shots/             逐轮验收截图
-# .analysis/          TTS 冒烟产物
 # out/                根目录下的临时产物
+# unrelated/          跟 Remotion 套件无关的东西：hf-promo/（走 hyperframes 的另一支片）、
+#                     tts-smoke/（pure-tts 冒烟产物）—— 分类见 docs/工作区-目录分类.md
 /docs/
 /remotion-kit-lab/
 /hotspot-zcode/
-/hf-promo/
 /.shots/
-/.analysis/
 /out/
+/unrelated/
 
 # ── 依赖与工具缓存 ────────────────────────────────────────────────────────────
 node_modules/
