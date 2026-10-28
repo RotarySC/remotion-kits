@@ -31,7 +31,7 @@
 | 溢出护栏（测量 / 截断） | `guards/fitting.ts`、`guards/ClampLines.tsx` |
 | 开发期诊断（参数越界 / 时序溢出） | `guards/diagnostics.ts`（`warnOnce` 去重；`warnIfStaggerOverflows` 报告） |
 | 契约原语（文字动效等） | `components/` |
-| **片子里要接一个三维场景**（外部素材，可编排机位） | `viewport/` —— 见下「三维视图」；场景内容不入库 |
+| **片子里要接一个三维场景**（外部素材，可编排机位） | `viewport/` —— 见下「三维视图」；场景内容不入库。**不能按 `t` 重放的就渲成序列帧/视频**，走 `MediaStage` 或 `<Img>` ＋ 帧号（契约 §7） |
 | 机器可读的槽契约 | `master/types.ts` 的 `LAYOUT_SPECS` |
 | **控制参数**（不是槽） | `master/types.ts` 的 `LAYOUT_CONTROL_PROPS` —— 「怎么排」类参数（`staggerInFrames`），**不进** `LAYOUT_SPECS`。判据见 `master-contract.md` §4 |
 | 验证载体 | `templates/` 的 4 个演示合成 |
@@ -160,7 +160,7 @@ kernel/
 - **能按 `t` 重放的才进得来**：靠真实时钟、靠「每次调用累加一步」的都过不了 `replayProbe` / `portingAudit`，那种就渲成序列帧走 `MediaStage`。
 - **卸载要释放**：`renderer.dispose()` 只放资源、不丢上下文，`dispose()` 里还要主动 `WEBGL_lose_context`。
 
-完整装载清单与边界见 [`references/viewport-contract.md`](../../references/viewport-contract.md)。
+完整装载清单与边界见 [`references/viewport-contract.md`](../../references/viewport-contract.md)；同一份 §7 是**另一条路**：预渲产物（序列帧 / 视频）怎么进 Remotion，以及两条路各自的判据与代价。
 
 ### 分镜（`shots`）：有建模、缺镜头
 
@@ -337,6 +337,7 @@ npx remotion render <comp-id> out/draft.mp4 --scale=0.5 --crf=28 --jpeg-quality=
 | **`viewport` 的 `follow` 每帧会多跑 `samples-1` 次 `advance`** | 平滑靠**闭环采样**（在 `t`、`t-dt`… 上取目标位置加权平均），不靠阻尼 —— 代价就是这几次推进。`samples` 越大越稳越贵；`samples: 1` 时主体被完全钉在画面中心（实测 120 帧离中心 `0.00 px`），`samples: 4` 会滞后 `7.47 px`（闭式 `7.48 px`） |
 | **多张 `<Viewport>` 同屏未测** | 一张一个 WebGL 上下文。同屏摆很多个之前先想想是否该合成一张图；「上限约十几个」只是经验值，没有实测读数 |
 | **`viewport` 的正交取景要求宿主自己实现** | 本层只把 `orthoHeight` 递过去。宿主的相机只有它自己知道是透视还是正交 —— 夹具一开始就漏了这条（只读 `fov`，`orthoHeight` 静默不生效），现在两种都实现 |
+| **预渲产物（序列帧 / 视频）不可编排** | 改一个机位就要重渲整镜 —— 这是它与 `<Viewport>` 的根本差别。两条消费路：序列帧 `<Img>` ＋ 帧号（**逐像素相同**，240/240 帧最大差 `0`；8 秒 1080p 占 **398 MB**）、或编成 mp4 走 `MediaStage`（**1.56 MB**，但最大差 `31–45`/255、99% 像素都变）。判据不能混用：前者用逐像素，后者只能写阈值 |
 | **没有「一屏多框」的版式**（**不加**） | 一屏摆多张框 = `Flow` ＋ `Panel`。**并排**：`ratio` ＋ `sizing="fill"`（`row` · `[2,1]` · 壳高确定 ⇒ 两框 `1173x240` / `587x240`，宽比 **1.998**、同高同顶、间隔 20）；**成列**：按需要的对齐选 `natural`（各按内容，参差）/ `equal`（取组内最大）/ `fill`（撑满本格）—— 判据是「参考图要的那三种对齐，今天各有一个词对应」。框里摆什么由 `Panel.children` 决定（**内容无关**），这正是**不**做成版式的理由：版式槽是字符串，而框里是数字 / 长文 / 徽章 |
 | **`Stat` 不自己缩字号** | 变长的数字（3 位到 12 位）**不会自动适配** —— 护栏住在母版层（`guards/fitting.ts` 的消费者全是版式）。要护栏就走 `stat` 版式；在组件层由调用方给 `fontSize`（与 `Title` 一致） |
 | **`Stat` 的单位 / 标签 / 说明字号由 `fontSize` 按比例推出**（0.3 / 0.28 / 0.2） | **有意为之**：一个数据点的大小是**一个整体** —— 数字变大，单位和标签该跟着变大，否则「量级」这个信息就散了。代价是推出来的字号是**计算值**，Studio 不可编辑（与 `TextTag` 的内边距、`MediaStage` 的标签字号同一种取舍） |
