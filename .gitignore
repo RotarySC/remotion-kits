@@ -7,12 +7,14 @@
 # docs/             设计与裁定记录、细节档案、证据图
 # remotion-kit-lab/   验证用的依赖工程（含抽帧物证）
 # hotspot-zcode/      成片工程
+# assets/           素材与预渲试验（3D 源文件、抽帧、导出成片）
 # .shots/           验收截图
 # out/              临时产物与验收证据
 # unrelated/        与本框架无关的其他产物
 /docs/
 /remotion-kit-lab/
 /hotspot-zcode/
+/assets/
 /.shots/
 /out/
 /unrelated/
