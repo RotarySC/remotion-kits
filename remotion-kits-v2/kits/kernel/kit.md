@@ -31,6 +31,7 @@
 | 溢出护栏（测量 / 截断） | `guards/fitting.ts`、`guards/ClampLines.tsx` |
 | 开发期诊断（参数越界 / 时序溢出） | `guards/diagnostics.ts`（`warnOnce` 去重；`warnIfStaggerOverflows` 报告） |
 | 契约原语（文字动效等） | `components/` |
+| **片子里要接一个三维场景**（外部素材，可编排机位） | `viewport/` —— 见下「三维视图」；场景内容不入库 |
 | 机器可读的槽契约 | `master/types.ts` 的 `LAYOUT_SPECS` |
 | **控制参数**（不是槽） | `master/types.ts` 的 `LAYOUT_CONTROL_PROPS` —— 「怎么排」类参数（`staggerInFrames`），**不进** `LAYOUT_SPECS`。判据见 `master-contract.md` §4 |
 | 验证载体 | `templates/` 的 4 个演示合成 |
@@ -68,6 +69,13 @@ kernel/
 │   ├── index.ts              ← 皮表 + `SkinId` + `resolveSkin`（不存在的皮**明确报错**）
 │   └── CornerMarks.tsx       ← 四角角标 —— 唯一那件**可组合的小装饰能力**
 ├── motion.ts                 ← 入场动效的最小公共计算 ＋「淡入上移」组合
+├── viewport/                 ← **三维视图**：把外部三维场景接进来并按帧编排（不含场景内容）
+│   ├── types.ts              ← SceneAdapter / SceneHost / Camera / Framing 的契约
+│   ├── host.tsx              ← <Viewport>：画布 ＋ 每帧「定机位 → 取景 → 推进」
+│   ├── cameras.ts            ← 机位库：static / crane / orbit / dolly / keyframes / cut / follow（全是 t 的纯函数）
+│   ├── framing.ts            ← 取景：画幅、透视/正交的「装满画面」计算、缓冲区尺寸
+│   ├── attach.ts             ← createHost 外壳 ＋ replayProbe（纯度探针）
+│   └── spec.ts               ← VIEWPORT_SPECS：登记「这一类能做什么」
 ├── assets/                   ← 演示素材：自造的 `demo-clip.mp4`（240×180 / 60 帧 / 13 KB），见 assets/README.md
 ├── components/               ← 19 个契约原语（Title / Subtitle / TextReveal / Emphasis / BulletList / Quote / SectionHeading / ProgressBar / SafeArea / Stage / MediaStage / MediaCard / ScrollArea / TextTag / RichTextBox / BarChart / Panel / Flow / Stat）
 │   └── specs.tsx             ← COMPONENT_SPECS：每个原语的 prop / `display` / `demoFrame` / 演示实例（展示页原语视图的数据来源，生成器会对照源码校验）
@@ -79,6 +87,7 @@ kernel/
     ├── mockMedia.ts          ← 演示素材的**程序生成**部分（4:3 的 SVG「网页截图」，data URI）
     ├── mockDoc.tsx           ← `ScrollArea` 的长文档夹具（行号沟 + 正文 + 标题栏）
     ├── mockData.ts           ← `TextTag` / `RichTextBox` / `BarChart` / `Panel` / `Stat` 的夹具（含 `lines` 槽的 TAB 拼接）
+    ├── mockScene.ts          ← `Viewport` 的**占位夹具**：线框立方体 + 一颗绕行的红点（canvas 2D 手写投影，几 KB）。红点是 `follow` 的目标，也是「跟得准不准」可按像素量的那个记号。⚠️ 不是资产、不承诺复用，也**不是**「怎么造 3D」的模板
     └── Scene.tsx             ← 组件层演示的脚手架（**故意不经过母版**）
 ```
 
@@ -132,6 +141,62 @@ kernel/
 - 四角角标那件装饰在 `skins/CornerMarks.tsx`。⚠️ 它**默认内缩 10px**：
   参考里框是 1px、角标 2px 所以贴角看得见；本套件框的粗细来自主题（默认 2px），
   贴角（`inset: 0`）时两者逐像素重合、抽帧出来**什么都看不见**（实测）。
+
+## 三维视图（`viewport`）
+
+片子里遇到 3D 场景时用它。**它不是建模工具、也不是场景库** —— 场景由作者在 Blender / 网页工具里做好，
+这一层只管三件事：
+
+| 这层做 | 怎么做 |
+| --- | --- |
+| **装载** | `SceneAdapter` 把外部素材包成 `SceneHost`；`createHost` 给外壳，作者填 5 个零件 |
+| **机位** | `cameras.ts`：`static` / `crane` / `orbit` / `dolly` / `keyframes` / `cut` / `follow`，全是 `t` 的纯函数；`shots`（分镜）见下 |
+| **取景** | `framing.ts`：画幅比、透视 `fov` / 正交高度、「装满画面」的计算 |
+| **分镜** | `shots.ts`：给一个主体尺寸和几张镜头，按「主体占画面几成」反解距离，排成一条带切点与过渡的镜头表 |
+
+三条判据：
+
+- **场景内容不入库**（与 mp4 / 截图同一条规矩）；`templates/mockScene.ts` 只是占位夹具，让目录那一格有东西看。
+- **能按 `t` 重放的才进得来**：靠真实时钟、靠「每次调用累加一步」的都过不了 `replayProbe` / `portingAudit`，那种就渲成序列帧走 `MediaStage`。
+- **卸载要释放**：`renderer.dispose()` 只放资源、不丢上下文，`dispose()` 里还要主动 `WEBGL_lose_context`。
+
+完整装载清单与边界见 [`references/viewport-contract.md`](../../references/viewport-contract.md)。
+
+### 分镜（`shots`）：有建模、缺镜头
+
+场景本身**没有镜头**时用它 —— 模型给了，但没人决定「先看全景还是先看窗、要不要切、什么时候推近」。
+这时补的不是内容，是**看的方式**：产物是一份纯 JSON 镜头表，几何一个字节都不动。
+
+```tsx
+<Viewport
+  adapter={myScene}
+  framing={{mode: 'perspective', fov: 40}}
+  camera={{
+    kind: 'shots',
+    subject: {center: [0, 0, 0], size: [1.44, 1.91, 1.91]}, // 主体的世界 AABB
+    shots: [
+      {id: 'establishing', duration: 1.3, view: {azimuth: 30, elevation: 14}, framing: {fill: 0.5},
+       move: {to: {azimuth: 60, elevation: 12}}},
+      {id: 'detail', duration: 1.2, view: {azimuth: 60, elevation: 12}, framing: {fill: 0.72}},
+      {id: 'return', duration: 1.5, view: {azimuth: 95, elevation: 8}, framing: {fill: 0.6},
+       transition: {frames: 10}, move: {to: {azimuth: 30, elevation: 14, fill: 0.5}}},
+    ],
+  }}
+/>
+```
+
+五条约束（每一条都量过）：
+
+| 约束 | 说明 |
+| --- | --- |
+| `subject.size` 是**世界单位**的 AABB | 说小了画面会空、说大了镜头会被推远。旋转件要报**旋转后**的包围盒（上面的 `1.91` 是立方体倾斜后的高度，不是边长 `1.44`）。⚠️ 因为量的是**包围盒**，所以肉眼看到的物体通常比 `fill` 小 —— 想让它读起来正好占几成，就按物体的实际外形声明 |
+| `fill` = 主体**投影高度**占画面高度的比例 | 不是屏幕百分比、也不是宽度。宽度任何时候都不许溢出，装不下就退让（高度占比随之变小） |
+| 各镜 `duration` 之和 = 合成长度 | 短了最后一镜被截断，长了最后一镜会停住 |
+| `transition.frames` 在这一镜**开头** | 缺省硬切。过渡的起点是**上一镜末尾的姿态**（闭式可算，不需要记住上一帧） |
+| 首尾要接得上（循环片段） | 最后一镜的 `move.to` 写回第一镜的 `view` / `fill`，接缝才是同一个机位 |
+
+⚠️ **正交取景下的分镜还没做**：`orthoHeight` 决定大小、距离不影响它，取景尺的假设不成立；
+现在会按透视解算并 `console.warn`。要正交就用固定机位 + `framing`。
 
 ## 依赖
 
@@ -269,6 +334,9 @@ npx remotion render <comp-id> out/draft.mp4 --scale=0.5 --crf=28 --jpeg-quality=
 | **`Panel` 的硬阴影默认关** | 深色主题上黑阴影压在近黑的底上**根本看不见**（与「网格色必须与底色同向」是同一个坑）。要用就显式开；`shadowColor` 默认取描边色（= 主题 `ink`），于是深色主题上它自动变成**浅色偏移**，仍然看得见 |
 | **`Panel` 的 `background` 默认不透明** | 这是**功能不是外观**：背景那层网格（或任何底纹）必须被卡挡住，卡内才是干净的。传 `'transparent'` 会让网格穿进卡里 |
 | **`Panel` 的 `width` 只有三档**（撑满 / 定宽 / 收紧），**没有对齐** | 「居中还是靠左」是**外面容器**的事 —— 卡不知道自己在画面里站哪儿，知道了就会和母版的位置打架。⚠️ 数字是**外框宽度**（给了宽度就按 `border-box`），所以 `width={600}` 量出来正好是 600。⚠️ `'fit'` 是「跟内容走」：内容里有**不换行的宽元素**（一长串等宽字符、固定列宽的表）时它会撑出画面，组件不截断 |
+| **`viewport` 的 `follow` 每帧会多跑 `samples-1` 次 `advance`** | 平滑靠**闭环采样**（在 `t`、`t-dt`… 上取目标位置加权平均），不靠阻尼 —— 代价就是这几次推进。`samples` 越大越稳越贵；`samples: 1` 时主体被完全钉在画面中心（实测 120 帧离中心 `0.00 px`），`samples: 4` 会滞后 `7.47 px`（闭式 `7.48 px`） |
+| **多张 `<Viewport>` 同屏未测** | 一张一个 WebGL 上下文。同屏摆很多个之前先想想是否该合成一张图；「上限约十几个」只是经验值，没有实测读数 |
+| **`viewport` 的正交取景要求宿主自己实现** | 本层只把 `orthoHeight` 递过去。宿主的相机只有它自己知道是透视还是正交 —— 夹具一开始就漏了这条（只读 `fov`，`orthoHeight` 静默不生效），现在两种都实现 |
 | **没有「一屏多框」的版式**（**不加**） | 一屏摆多张框 = `Flow` ＋ `Panel`。**并排**：`ratio` ＋ `sizing="fill"`（`row` · `[2,1]` · 壳高确定 ⇒ 两框 `1173x240` / `587x240`，宽比 **1.998**、同高同顶、间隔 20）；**成列**：按需要的对齐选 `natural`（各按内容，参差）/ `equal`（取组内最大）/ `fill`（撑满本格）—— 判据是「参考图要的那三种对齐，今天各有一个词对应」。框里摆什么由 `Panel.children` 决定（**内容无关**），这正是**不**做成版式的理由：版式槽是字符串，而框里是数字 / 长文 / 徽章 |
 | **`Stat` 不自己缩字号** | 变长的数字（3 位到 12 位）**不会自动适配** —— 护栏住在母版层（`guards/fitting.ts` 的消费者全是版式）。要护栏就走 `stat` 版式；在组件层由调用方给 `fontSize`（与 `Title` 一致） |
 | **`Stat` 的单位 / 标签 / 说明字号由 `fontSize` 按比例推出**（0.3 / 0.28 / 0.2） | **有意为之**：一个数据点的大小是**一个整体** —— 数字变大，单位和标签该跟着变大，否则「量级」这个信息就散了。代价是推出来的字号是**计算值**，Studio 不可编辑（与 `TextTag` 的内边距、`MediaStage` 的标签字号同一种取舍） |

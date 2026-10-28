@@ -7,6 +7,8 @@
 | 能力 | 说明 |
 | --- | --- |
 | 内核原语 19 | `remotion-kits-v2/kits/kernel/components/`：Panel · Flow · Stat · BarChart · ScrollArea · MediaStage · RichTextBox …；`specs.tsx` 是唯一登记表 |
+| 三维视图 | `viewport/`：把一个**外部**三维场景按帧播起来并编排机位（7 种机位，全是 `t` 的纯函数）与取景（透视 / 正交）；场景内容**不入库**，仓库只带一份占位夹具。跟随、正交、取景都有像素级读数 |
+| 分镜 | `viewport/shots.ts`：**有建模、缺镜头**时补镜头。给主体尺寸与几张镜头（构图 / 运动 / 时长 / 切点与过渡），按「主体占画面几成」反解距离；产物是纯 JSON，几何一个字节都不动。实测声明 55% 渲出 55.25%、硬切处是唯一跳变 |
 | 通用版式 6 | cover · headline · list · stat · quote · closing；`LAYOUT_SPECS` 与 `ShowcaseScenes` 一一对应 |
 | 家具 2 | `FooterRail` · `Masthead`：由母版注入，场景不自己摆 |
 | 主题 4 | `default-dark` · `paper-seal` · `bubble-pop` · `neon-terminal`；换主题不动版式 |
@@ -16,12 +18,12 @@
 | 类型包 hotspot | 3 版式（timeline / stance / multi-stat）· 2 家具（事件时间戳 / 来源与可信度）· 2 主题 · 母版 / 场景 / 主题三份演示 ＋ `compose.ts` 资产声明 |
 | 展示页 | 画廊 · 工作台（真实夹具＋主题＋临时试验）· 内容对照 · 全局搜索；**自动发现**资产，不手写清单 |
 | 更新器 | [`update-kits.ps1`](remotion-kits-v2/tools/update-kits.ps1)：按 `.kit-origin` 基线把母本改动刷进工程副本，**默认只报告** |
-| 契约 8 份 | [`references/`](remotion-kits-v2/references/)：主题 / 母版 / 组件 / 创作 / 改造 / 入库 / 渲染档 / 目录 |
+| 契约 9 份 | [`references/`](remotion-kits-v2/references/)：主题 / 母版 / 组件 / 视图 / 创作 / 改造 / 入库 / 渲染档 / 目录 |
 | 维护工具 | [`tools/`](tools/)：镜像与多副本哈希比对 · 套件盘点 · 基线修剪 · 抽帧修剪 · 架构草图 · Studio 护栏打/撤 · 别名探测 · 帧差 |
 
-**组织方式**：内核 **58** 个文件全系统只有一份；类型包 **17** 个文件只放差异，运行时靠自己的 `master/MasterFrame.tsx` 适配器把「内核引擎 ＋ 本套件家具」组合起来，调用方接口不变。
+**组织方式**：内核 **67** 个文件全系统只有一份；类型包 **17** 个文件只放差异，运行时靠自己的 `master/MasterFrame.tsx` 适配器把「内核引擎 ＋ 本套件家具」组合起来，调用方接口不变。
 
-**规模**（2026-10-27 现测）：仓库 **133** 个文件 ＝ [`remotion-kits-v2/`](remotion-kits-v2/) **113**（`kits/` 75 ＝ kernel 58 ＋ hotspot 17 · `references/` 8 · `showcase/` 25 · `tools/` 4）＋ [`tools/`](tools/) 16 ＋ 根 4。
+**规模**（2026-10-28 现测）：仓库 **143** 个文件 ＝ [`remotion-kits-v2/`](remotion-kits-v2/) **123**（`kits/` 84 ＝ kernel 67 ＋ hotspot 17 · `references/` 9 · `showcase/` 25 · `tools/` 4 · `SKILL.md`）＋ [`tools/`](tools/) 16 ＋ 根 4。
 
 **分发是版本化源码复制，不是共享依赖**：套件被复制进工程，工程可以就地改；要跟随上游更新就跑更新器。它靠 `<工程>/.kit-origin/` 里的**基线**分清「上游改了」与「你为这支片子改过」—— 没有基线，这两件事长得一模一样。
 
@@ -172,7 +174,7 @@ pwsh -NoProfile -File tools\kit-copy-check.ps1
 git diff --check
 ```
 
-末次完整读数（**2026-10-25 重跑**，与 2026-10-08 记录逐项一致）：页面结构 **88 项** · 工作台 **39 项** · 真实交互 **59 项 / 0 运行错误 / 1 条预期诊断** · 同步管线 **34 项**。单次构建 **12.4 s**，发布 1 个 build（63 个唯一资产 · hotspot 3 版式 / 4 场景 · kernel 6 版式 / 8 场景 · **24 条 NOTE、0 WARN**），随后 `-CheckFresh` 返回 `fresh: true`；`tsc --noEmit` exit 0 · `mirror-check` **113/113** · `kit-copy-check` **75/75 × 4 处**。
+末次完整读数（**2026-10-28 重跑**，提交 `d8a5cb2` 之后）：页面结构 **90 项** · 工作台 **39 项** · 真实交互 **60 项 / 0 运行错误 / 1 条预期诊断** · 同步管线 **34 项**。构建发布 1 个 build（64 个唯一资产 · hotspot 3 版式 / 4 场景 · kernel 6 版式 / 8 场景 · **24 条 NOTE、0 WARN**），bundle **717,664 B**、静帧 **56 张**，随后 `--check --suite kernel` 返回 `fresh: true`；`tsc --noEmit` exit 0（内核工作台与工程副本各跑一次）· `mirror-check` **123/123** · `kit-copy-check` **84/84 × 4 处**。
 
 **测什么算数**：
 
@@ -193,7 +195,8 @@ git diff --check
 | 嵌套 `fill` | 已修（`row` 分支补 `minmax(0, 1fr)`）；只量一档容器高度量不出它 |
 | `tracks` 与 `ratio` | 类型互斥（双传 `TS2322`）⇒ props 成联合，「整体转发 props」要 cast |
 | `MediaStage` | 渲染期**不能**用 data URI：`<OffthreadVideo>` 的取帧服务不认 `data:` |
-| 行尾 | `.gitattributes` 是 `* -text`。判据是逐文件哈希，改成 `text=auto` 会让判据**静默失效** |
+| 行尾 | `.gitattributes` 是 `* -text`（不换算行尾 —— 换算会改写二进制）。**文本文件一律 LF**：带 CR 的行会被 `git diff --check` 判成 trailing whitespace，评审时整文件变红。判据是逐文件哈希，改成 `text=auto` 会让判据**静默失效** |
+| 3D / WebGL 场景 | 资产分类仍是四类（版式 / 动效 / 家具 / 主题）；三维走**能力层** `kernel/viewport/`。展示页把它当成单独一格「三维视图」（`kind: 'viewport'`）发现并挂载，但它**不是资产槽**：**场景内容不入库**（与 mp4 / 截图同一条规矩），仓库只带一份几 KB 的占位夹具。展示页不会发现任何具体场景 —— 这是设计，不是缺口 |
 
 **最容易再踩的坑**：
 
@@ -203,5 +206,8 @@ git diff --check
 **未验证 / 未做**：
 
 - 套件更新后的**整片渲染重跑**没做过：目前「改动与画面等价」是结构推断，没有对整片做帧哈希封样。
-- 展示页的 GPU 性能基准没跑过；`-WithImages` 静帧抽取本轮未重跑（46 张是 2026-10-08 的）。
-- 本文件（2026-10-25）只改文档，但 `tsc`、展示页构建与四个 verify 入口都已重跑，读数见「自验」；母版边界与多类型包夹具两组（11 / 118 项）本轮未重跑。
+- 展示页的 GPU 性能基准没跑过；静帧 **56 张**已随本轮 `--images` 重抽。
+- 三维视图两项**未测**：多张 `<Viewport>` 同屏（一张一个 WebGL 上下文，「上限约十几个」只是经验值）、真 GPU 下的帧时间（现有 16.7 ms 是 headless / SwiftShader 读数）。
+- **正交取景下的分镜**没做：正交里大小由 `orthoHeight` 决定、距离不影响它，取景尺的假设不成立，现在按透视解算并 `warn`。
+- 仓库**不带**外部三维素材的可运行样例：那种素材按「内容不入库」的规矩不进来，能跑的只有占位夹具。
+- 本文件（2026-10-28）改的是两件事：文本文件行尾统一为 LF；`Scene3D` 撤出主干（它解决的是「怎么造一个 3D 体」，与本框架「怎么把外部 3D 放进版式」的能力边界相反）。撤出后 `tsc`、展示页构建、四个 verify 入口、两条一致性判据都已重跑。

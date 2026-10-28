@@ -16,6 +16,8 @@ export function demoCode(asset: Asset, c: Controls, demo: string) {
     return `const enter = ${asset.name}({\n  frame, startInFrames: ${c.start},\n  durationInFrames: ${c.duration}${asset.name === 'fadeUp' ? ',\n  distanceInPx: ' + c.distance : ',\n  shift: "0px ' + c.distance + 'px"'}\n});\n<div style={enter}>{content}</div>`;
   if (asset.name === 'FreeComposition')
     return `<Flow ratio={[2, 1]} sizing="fill">\n  <Panel>{yourJSX}</Panel>\n  <div>{ordinaryJSX}</div>\n</Flow>`;
+  if (asset.kind === 'viewport')
+    return `// 场景内容不进仓库：adapter 由你的片子工程提供\n<Viewport\n  adapter={mySceneAdapter}\n  width={1280} height={720}\n  camera={{kind: 'orbit', center: [0, 0, 0],\n    radius: 3.4, height: 1.4, fromDeg: 30, toDeg: 120,\n    ease: 'linear', start: 0, end: 4}}\n  framing={{mode: 'perspective', fov: 40}}\n/>`;
   return `// 演示与源码\n// ${asset.sourcePath}\n// 调用处持有内容和时序`;
 }
 function ScrollExperiment({lib, c}: {lib: any; c: Controls}) {
@@ -123,6 +125,70 @@ function FrameContent({
     </Master>
   );
 }
+/**
+ * 三维视图：**宿主 + 占位夹具 + 一份分镜**。
+ *
+ * 夹具只提供「一块能被看的体」，宿主负责装载，**分镜**负责「看哪儿、看多大」——
+ * 三件事分开，正是这一类与「3D 资产」的区别：场景内容在片子工程里，不进这个仓库。
+ *
+ * 三镜共 4 秒（= 演示窗口 120 帧），所以格子循环播时接缝不跳：
+ * 第三镜**收回到第一镜的起始姿态**，第一镜的第一帧与第三镜的最后一帧是同一个机位。
+ * 中间有一个硬切（远景 → 特写）和一个 10 帧过渡 —— 这是「分镜」该有的样子，
+ * 不是一条从头转到尾的曲线。
+ *
+ * 主体尺寸写的是**倾斜后的立方体**包围盒（1.44 / 1.907 / 1.907），所以「占几成」是按
+ * 真实占位算的，不是拍脑袋的数。
+ */
+const MOCK_SUBJECT = {center: [0, 0, 0] as const, size: [1.44, 1.907, 1.907] as const};
+
+function ViewportDemo({lib, theme}: {lib: any; theme?: any}) {
+  const Viewport = lib.Viewport,
+    adapter = lib.MockScene;
+  if (!Viewport || !adapter) {
+    return <p>该套件没有提供三维视图宿主（`viewport/host.tsx`）或占位夹具。</p>;
+  }
+  return (
+    <div
+      data-live-viewport
+      style={{width: 1280, height: 720, position: 'relative', background: theme?.color.bg ?? '#0B0D10'}}
+    >
+      <Viewport
+        adapter={adapter}
+        width={1280}
+        height={720}
+        camera={{
+          kind: 'shots',
+          subject: MOCK_SUBJECT,
+          shots: [
+            {
+              id: 'establishing',
+              duration: 1.3,
+              view: {azimuth: 30, elevation: 14},
+              framing: {fill: 0.62},
+              move: {to: {azimuth: 60, elevation: 12}, ease: 'inout'},
+            },
+            {
+              id: 'detail',
+              duration: 1.2,
+              view: {azimuth: 60, elevation: 12},
+              framing: {fill: 0.95},
+            },
+            {
+              id: 'return',
+              duration: 1.5,
+              view: {azimuth: 95, elevation: 8},
+              framing: {fill: 0.75},
+              transition: {frames: 10, ease: 'inout'},
+              move: {to: {azimuth: 30, elevation: 14, fill: 0.62}, ease: 'inout'},
+            },
+          ],
+        }}
+        framing={{mode: 'perspective', fov: 40}}
+      />
+    </div>
+  );
+}
+
 export function NativeDemo({
   asset,
   registry,
@@ -241,6 +307,7 @@ export function NativeDemo({
       <p>当前归属没有 Panel 演示适配器。</p>
     );
   } else if (asset.name === 'ScrollArea') content = <ScrollExperiment lib={owner} c={c} />;
+  else if (asset.kind === 'viewport') content = <ViewportDemo lib={owner} theme={theme} />;
   else if (asset.kind === 'motion') {
     const calculate = owner.motion?.[asset.name];
     content = calculate ? (

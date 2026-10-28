@@ -8,7 +8,8 @@ export type Kind =
   | 'theme'
   | 'skin'
   | 'motion'
-  | 'example';
+  | 'example'
+  | 'viewport';
 export type Demonstration = {
   id: string;
   name: string;
@@ -80,6 +81,10 @@ export type Library = {
   useShowcaseFurniture?: () => any;
   KitShowcase?: React.ComponentType<any>;
   Stage?: React.ComponentType<any>;
+  /** 三维视图宿主（`viewport/host.tsx`） */
+  Viewport?: React.ComponentType<any>;
+  /** 三维视图的占位夹具（`templates/mockScene.ts`）—— 不是场景资产 */
+  MockScene?: (env: any) => any;
   skins?: any;
   motion?: any;
 };
@@ -122,6 +127,7 @@ export const KIND_LABELS: Record<Kind, string> = {
   skin: '皮',
   motion: '动效',
   example: '组合演示',
+  viewport: '三维视图',
 };
 export function ownedCategories(manifest: Manifest, owner: string) {
   const assets = manifest.assets.filter((asset) => asset.owner === owner);

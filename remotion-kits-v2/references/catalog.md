@@ -150,6 +150,17 @@
 
 `cover` / `headline` / `list` / `stat` / `quote` / `closing`，槽契约见 `master/types.ts` 的 `LAYOUT_SPECS`。
 
+### 三维视图（`viewport`，**能力层**）
+
+**片子里遇到 3D 场景时用它。** 它不产生内容，只负责「怎么看在看什么」：装载（把外部场景的
+时钟换成帧号）、机位（`t` 的纯函数）、取景（视口与缩放）。
+
+- 场景内容**永远不入库**（与 mp4 / 截图同一条规矩）；仓库只带一份**占位夹具**，让目录那一格有东西看。
+- 准入判据只有一条：**能不能按 `t` 重放**。不能的（靠真实时钟 / 按 `dt` 累加）就渲成序列帧，走 `MediaStage`。
+- 清单以 `viewport/spec.ts` 的 `VIEWPORT_SPECS` 为准，本目录不复述；契约见 [`viewport-contract.md`](viewport-contract.md)。
+
+⚠️ 它**不是**建模工具，也**不是**场景资产库 —— 多支持一种体，加的是机位/取景的用法，不是资产。
+
 ### 依赖
 
 **唯一额外依赖：`@remotion/layout-utils`（官方包，版本随 Remotion）。**

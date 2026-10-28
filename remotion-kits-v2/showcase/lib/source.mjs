@@ -232,6 +232,7 @@ export async function discover(config) {
       showcase: 'templates/ShowcaseScenes.tsx',
       skins: 'skins/index.ts',
       motion: 'motion.ts',
+      viewport: 'viewport/spec.ts',
     })) {
       const file = path.join(suite.dir, relative);
       if (await exists(file)) {
@@ -316,6 +317,9 @@ export async function discover(config) {
       ['useShowcaseFurniture', 'templates/ShowcaseScenes.tsx', 'useShowcaseFurniture'],
       ['KitShowcase', 'templates/KitShowcase.tsx', 'KitShowcase'],
       ['Stage', 'components/Stage.tsx', 'Stage'],
+      // 三维视图层：宿主组件 + 占位夹具。两个都由展示页直接取用（与母版/场景同一种取法）
+      ['Viewport', 'viewport/host.tsx', 'Viewport'],
+      ['MockScene', 'templates/mockScene.ts', 'mockScene'],
     ]) {
       const file = path.join(suite.dir, relative);
       if (await exists(file)) runtime[suite.name][key] = {file, exportName};
@@ -562,6 +566,51 @@ export async function discover(config) {
           demoFrame: 44,
         }),
       );
+    // **三维视图**：这里登记的是「能力」（宿主 + 机位 + 取景），不是场景内容。
+    // 与组件那条路同一条纪律 —— 声明（VIEWPORT_SPECS）与源码（ViewportProps）互为镜像，漂了就报警。
+    const viewportFile = path.join(suite.dir, 'viewport/host.tsx');
+    const viewportSpecs = f.viewport?.VIEWPORT_SPECS ?? [];
+    if (viewportSpecs.length && !(await exists(viewportFile)))
+      warnings.push(`${name}: 声明了三维视图，但缺少 ${viewportFile}`);
+    const viewportNames = [];
+    for (const spec of viewportSpecs) {
+      const cn = label(name, 'viewports', spec.name);
+      if (!cn) warnings.push(`${name}/labels.ts: viewports 缺 ${spec.name}`);
+      if (!(await exists(viewportFile))) continue;
+      const actual = publicProps(ts, program, viewportFile, spec.name);
+      if (!actual) {
+        warnings.push(`${name}/${spec.name}: 公开 Props 无法解析（三维视图）`);
+        continue;
+      }
+      const actualNames = new Set(actual.map((p) => p.name));
+      for (const p of spec.props)
+        if (!actualNames.has(p.name))
+          warnings.push(`${name}/${spec.name}: 声明 prop ${p.name} 不存在于公开 Props（三维视图）`);
+      for (const p of actual)
+        if (!spec.props.some((v) => v.name === p.name))
+          notes.push(`${name}/${spec.name}: ${p.name} 未写展示说明`);
+      for (const t of spec.tunable ?? [])
+        if (!spec.props.some((p) => p.name === t))
+          warnings.push(`${name}/${spec.name}: tunable ${t} 无对应声明`);
+      viewportNames.push(spec.name);
+      const loopFrames = spec.loopFrames ?? 120;
+      push(
+        mk(name, 'viewport', spec.name, viewportFile, {
+          label: cn ?? spec.name,
+          purpose: spec.purpose,
+          props: spec.props,
+          publicProps: actual,
+          tunable: spec.tunable,
+          // 演示窗口就是**一个循环**：画廊的格子按 [from, from+duration) 循环播，
+          // 所以接缝处是否跳，由套件里那份机位脚本负责（见 viewport/spec.ts 的 loopFrames）
+          demonstrations: [
+            {id: 'viewport', name: spec.name, from: 0, duration: loopFrames},
+          ],
+          demoIds: ['viewport'],
+          demoFrame: spec.demoFrame,
+        }),
+      );
+    }
     for (const [layer, keys] of Object.entries({
       elements: [...registered],
       layouts: Object.keys(f.layouts?.LAYOUT_SPECS ?? {}),
@@ -572,6 +621,7 @@ export async function discover(config) {
         .map((p) => path.basename(p, '.tsx')),
       themes: f.theme?.THEME_IDS ?? [],
       scenes: scenes.map((s) => s.name),
+      viewports: viewportNames,
     }))
       for (const key of Object.keys(f.labels?.LABELS?.[layer] ?? {}))
         if (!keys.includes(key)) warnings.push(`${name}/labels.ts: ${layer} 存在无资产标签 ${key}`);

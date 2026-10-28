@@ -61,6 +61,8 @@ export async function verifyWorkbench(page, url, out) {
       /^0 \/ /.test(await progress()) && actualFrame === scene.from,
       {progress: await progress(), actualFrame, scene},
     );
+    // ⚠️ 顺序必须与 `gallery/model.ts` 的 `KIND_LABELS` 一致 ——
+    // `trialWindow` 就是按那份表的键顺序排的，这里漏一类或顺序不同，窗口断言会假红。
     const kinds = [
       'primitive',
       'arrangement',
@@ -71,6 +73,7 @@ export async function verifyWorkbench(page, url, out) {
       'skin',
       'motion',
       'example',
+      'viewport',
     ];
     for (const suite of manifest.suites) {
       const ordered = kinds.flatMap((kind) =>

@@ -96,4 +96,12 @@ export const LABELS: Readonly<Record<string, Readonly<Record<string, string>>>> 
     'Scene 17 — skin, long & short': '皮 · 长短内容',
     'Scene 18 — skin, local override': '皮 · 局部覆盖',
   },
+
+  /**
+   * 三维视图 —— 键 = `viewport/spec.ts` 里 `VIEWPORT_SPECS` 的 `name`。
+   * ⚠️ 这一层登记的是**能力**（宿主 + 机位 + 取景），不是场景内容；场景永远是外部素材。
+   */
+  viewports: {
+    'Viewport': '三维视图',
+  },
 };
