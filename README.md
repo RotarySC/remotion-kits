@@ -2,6 +2,10 @@
 
 把「**一类视频需求**」沉淀成「**一套可复用组件**」：**一个内核**（主题 / 母版 / 原语 / 护栏）＋**若干类型包**（只放差异），外加一个**展示页**，让每个组件真的渲染出来给人看，而不是读代码描述。
 
+![展示页总览](media/showcase-overview.jpg)
+
+*展示页总览：侧栏是职责导航，中间两个入口分别是内核与类型包。这个页面由套件源码构建，不是画的。*
+
 ## 能力
 
 | 能力 | 说明 |
@@ -19,11 +23,19 @@
 | 展示页 | 画廊 · 工作台（真实夹具＋主题＋临时试验）· 内容对照 · 全局搜索；**自动发现**资产，不手写清单 |
 | 更新器 | [`update-kits.ps1`](remotion-kits-v2/tools/update-kits.ps1)：按 `.kit-origin` 基线把母本改动刷进工程副本，**默认只报告** |
 | 契约 9 份 | [`references/`](remotion-kits-v2/references/)：主题 / 母版 / 组件 / 视图 / 创作 / 改造 / 入库 / 渲染档 / 目录 |
-| 维护工具 | [`tools/`](tools/)：镜像与多副本哈希比对 · 套件盘点 · 基线修剪 · 抽帧修剪 · 架构草图 · Studio 护栏打/撤 · 别名探测 · 帧差 |
+| 维护工具 | [`tools/`](tools/)：镜像与多副本哈希比对 · 套件盘点 · 基线修剪 · 抽帧修剪 · 架构草图 · Studio 护栏打/撤 · 别名探测 · 帧差 · 本页配图截图（`shoot-readme-figures.mjs`） |
+
+![三层：内核 / 类型包 / 展示页](media/kit-layers.jpg)
+
+*示意图（AI 生成，**不是产品截图**）：内核只有一份、类型包只放差异、展示页把它们渲染出来 —— 上面那句话的结构。**
+
+![分镜：同一栋房子，六个机位](media/storyboard.jpg)
+
+*示意图（AI 生成）：同一栋房子、六种机位与取景。**有建模、缺镜头**时补的就是这一层（`viewport/shots.ts`，产物是纯 JSON）。*
 
 **组织方式**：内核 **67** 个文件全系统只有一份；类型包 **17** 个文件只放差异，运行时靠自己的 `master/MasterFrame.tsx` 适配器把「内核引擎 ＋ 本套件家具」组合起来，调用方接口不变。
 
-**规模**（2026-10-28 现测）：仓库 **142** 个文件 ＝ [`remotion-kits-v2/`](remotion-kits-v2/) **122**（`kits/` 84 ＝ kernel 67 ＋ hotspot 17 · `references/` 9 · `showcase/` 24 · `tools/` 4 · `SKILL.md`）＋ [`tools/`](tools/) 16 ＋ 根 4。
+**规模**（2026-10-28 现测）：仓库 **147** 个文件 ＝ [`remotion-kits-v2/`](remotion-kits-v2/) **122**（`kits/` 84 ＝ kernel 67 ＋ hotspot 17 · `references/` 9 · `showcase/` 24 · `tools/` 4 · `SKILL.md`）＋ [`tools/`](tools/) **17** ＋ [`media/`](media/) 4 ＋ 根 4。
 
 **分发是版本化源码复制，不是共享依赖**：套件被复制进工程，工程可以就地改；要跟随上游更新就跑更新器。它靠 `<工程>/.kit-origin/` 里的**基线**分清「上游改了」与「你为这支片子改过」—— 没有基线，这两件事长得一模一样。
 
@@ -125,6 +137,10 @@ pwsh -File remotion-kits-v2\showcase\generate.ps1 -Project <依赖工程> -WithI
 - 自动发现：解析 `THEME_IDS` / `LAYOUT_SPECS` / `COMPONENT_SPECS` / `FurnitureConfig` / `Root.tsx` 注册 / `compose.ts` 资产声明，再扫文件系统。**手写清单一定漂移，而漂移的展示页会撒谎。**
 - 报警两级：`WARN` ＝ 登记 / 类型 / 来源不一致（阻断发布）；`NOTE` ＝ 夹具没演练到（不阻断）。
 - 输出在 `dist/builds/<buildId>/`，通过校验才原子替换入口；失败候选不发布，页面继续服务上一成功版本。
+
+![内核目录](media/showcase-kernel.jpg)
+
+*内核目录（同一份构建）：每张卡片的画面都是该组件的**真实渲染**，不是效果图 —— 这也是「漂移就会撒谎」那句的来由。*
 
 ### 镜像同步（改过 `kits/**` 或 `references/**` 之后）
 
