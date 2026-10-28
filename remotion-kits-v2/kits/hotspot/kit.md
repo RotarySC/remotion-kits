@@ -47,7 +47,7 @@ hotspot/                    ← **只放差异**：内核那一层由 `compose.t
 ├── master/                 ← 母版层：本类型的版面差异
 │   ├── types.ts            ← 本类型那 3 个版式的 LAYOUT_SPECS + `FurnitureConfig` 的 `&` 扩展
 │   │                          （**控制参数** `staggerInFrames` 不进槽表 —— 名字在内核的
-│   │                           `LAYOUT_CONTROL_PROPS`，判据见 `master-contract.md` §4）
+│   │                           `LAYOUT_CONTROL_PROPS`，判据见 [`master-contract.md`](../../references/master-contract.md) §4）
 │   ├── stagger.ts          ← 三个新版式共用的逐条时序收紧
 │   ├── MasterFrame.tsx     ← ★ **适配器**：把本套件家具送进内核引擎的 `headExtra` / `footExtra`
 │   ├── furniture/
@@ -79,7 +79,7 @@ hotspot/                    ← **只放差异**：内核那一层由 `compose.t
 
 - **「改内核不会自动流入」这句话的代价变了**：本套件**没有**内核那份文件，
   所以不存在「两份同时在改、改一处漏一处」。要守的只有两件 ——
-  `compose.ts` 的声明与目录一致（生成器会 WARN）、本套件自己那几层的回归（`modification-workflow.md` 第 5 节）；
+  `compose.ts` 的声明与目录一致（生成器会 WARN）、本套件自己那几层的回归（[`modification-workflow.md`](../../references/modification-workflow.md) 第 5 节）；
 - **组件层未新增任何原语**：本套件的价值在版式层与家具层，叶子元素沿用内核
   （按 `authoring.md` 步骤 0，三个新版式的内部结构只出现一次，内联比重抽象更省事）。
 
@@ -91,12 +91,11 @@ hotspot/                    ← **只放差异**：内核那一层由 `compose.t
 | `alert-contrast` | 高警示的头版感 | 纸白底 + 近黑墨 + 朱红强调 + **4px 粗线 + 胶囊（圆角 999）**；报头带 116；入场带回弹 |
 
 两个方向在**色板、字族、字阶、安全区、间距、动效签名、图形语言**七个维度上都不一样
-（`theme-contract.md` 第 1 节），不是「同一套换了个色」。
-字体族都点名了**本机真实存在**的字（`Microsoft YaHei` / `Consolas` / `SimHei` / `Courier New`），
-避免 Chromium 按字重逐段回退。
+（[`theme-contract.md`](../../references/theme-contract.md) 第 1 节），不是「同一套换了个色」。
+字体族都点名了具体字族（`Microsoft YaHei` / `Consolas` / `SimHei` / `Courier New`）—— 这些要在系统里真的装了才生效，目的是避免 Chromium 按字重逐段回退。
 
 **加第三个主题的最简路径**：照 `signal-dark.ts` 复制一份 → 在 `theme/index.ts` 三处登记 →
-重跑下方闭环。**版式与家具一行都不用改**（判据见 `theme-contract.md` 第 6.3 节）。
+重跑下方闭环。**版式与家具一行都不用改**（判据见 [`theme-contract.md`](../../references/theme-contract.md) 第 6.3 节）。
 
 ## 九个版式的槽契约
 
@@ -228,11 +227,6 @@ npx remotion render HotspotMasterShowcase out/draft.mp4 --scale=0.5 --crf=28 --j
 ## 验证记录
 
 **验收 = 三件事**：`tsc --noEmit` exit 0 · `compositions` 列出全部合成 · **按版式抽帧并真的看图**
-（9 个版式各一张，清单类补末尾帧；加主题时每主题 × 每版式一张）。命令见 `SKILL.md` 第四节。
+（9 个版式各一张，清单类补末尾帧；加主题时每主题 × 每版式一张）。命令见 [`SKILL.md`](../../SKILL.md) 第四节。
 
 本套件的三个专属版式是抽帧重点：它们的分栏与字号在真实文案上最容易出问题。
-
-## 实施记录
-
-逐轮实施记录**不在本文件里**：本类型三个版式的设计理由、抽帧抓到的缺陷与修法都在 **git 历史**
-（`git log --follow -- kits/hotspot/kit.md`）。本文件只描述**现状**：清单 / 已知限制 / 验收要跑什么。

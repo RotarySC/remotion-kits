@@ -24,7 +24,7 @@
 | --- | --- |
 | 契约原语（**内核的** `components/`） | **内核的** `templates/KitShowcase.tsx` |
 | 母版版式（该类型包的 `master/layouts/`） | 该类型包的 `templates/ShowcaseScenes.tsx`（母版与主题两套演示共用） |
-| 主题（该类型包的 `theme/`） | `theme-contract.md` 第 6 节（每版式每主题抽帧 + 哈希比对） |
+| 主题（该类型包的 `theme/`） | [`theme-contract.md`](theme-contract.md) 第 6 节（每版式每主题抽帧 + 哈希比对） |
 
 ---
 
@@ -98,7 +98,7 @@ fontFamily: theme.font.family,
 ```
 
 - **字号默认值保持内联**（Studio 可编辑）。要让字号跟随主题，让调用方显式传 `theme.type.*`；
-- 安全区缩放一律 `Math.min(width, height) / 1080` —— 见 `component-contract.md` 第 5 节。
+- 安全区缩放一律 `Math.min(width, height) / 1080` —— 见 [`component-contract.md`](component-contract.md) 第 5 节。
 
 ---
 
@@ -111,7 +111,7 @@ fontFamily: theme.font.family,
 - **原语还要写进内核的 `components/specs.tsx` 的 `COMPONENT_SPECS`** —— 声明它的 prop、
   **显示语义 `display`**（`inline` / `block` / `container`）、
   **`demoFrame`**（该原语自己的动画完成帧，各原语不同）、
-  **`tunable`**（1–3 个「想改 / 能改」的 prop —— 展示页只挂这几个，判据见 `component-contract.md` 第 5 节）
+  **`tunable`**（1–3 个「想改 / 能改」的 prop —— 展示页只挂这几个，判据见 [`component-contract.md`](component-contract.md) 第 5 节）
   和一个诚实的演示实例。
   这是**原语视图**的数据来源，也是「声明 vs 实现」漂移检查的对照物 ——
   生成器会拿它比组件源码的 `type Props`，并检查 `display` 合法、`demoFrame` 已声明；
@@ -144,7 +144,7 @@ npx remotion still <ShowcaseId> out/k-new.png --frame=<新场景中点>
 - 改了原语 / 版式 → 重跑 `KitShowcase` 与 `MasterShowcase` 的整组抽帧；
 - **改的是内核那一层 → 还要重新生成展示页**：每个类型包那一页的元素墙都是从内核补入的，
   不重跑它就与套件不同步（而不同步的展示页比没有更坏 —— 它说谎）；
-- 改了主题或加了主题 → 按 `theme-contract.md` 第 6 节跑**每版式每主题**的抽帧，并做一次哈希比对；
+- 改了主题或加了主题 → 按 [`theme-contract.md`](theme-contract.md) 第 6 节跑**每版式每主题**的抽帧，并做一次哈希比对；
 - **如果新组件用了 WebGL**（`@remotion/effects` / `three` / 地图），抽帧前先确认 `--gl=angle` 已生效。
 
 ---

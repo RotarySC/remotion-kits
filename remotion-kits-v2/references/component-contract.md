@@ -63,7 +63,7 @@ import {useTheme} from '../theme/context';   // ✅ 唯一正当入口
 ```
 
 组件、版式、家具、护栏**一律不许 import 具体主题文件**（`theme/paper-seal` 之类）。
-只有主题注册表与合成入口可以（见 `theme-contract.md` 第 3 节）。
+只有主题注册表与合成入口可以（见 [`theme-contract.md`](theme-contract.md) 第 3 节）。
 
 ### 分层例外
 

@@ -33,7 +33,7 @@
 | 契约原语（文字动效等） | `components/` |
 | **片子里要接一个三维场景**（外部素材，可编排机位） | `viewport/` —— 见下「三维视图」；场景内容不入库。**不能按 `t` 重放的就渲成序列帧/视频**，走 `MediaStage` 或 `<Img>` ＋ 帧号（契约 §7） |
 | 机器可读的槽契约 | `master/types.ts` 的 `LAYOUT_SPECS` |
-| **控制参数**（不是槽） | `master/types.ts` 的 `LAYOUT_CONTROL_PROPS` —— 「怎么排」类参数（`staggerInFrames`），**不进** `LAYOUT_SPECS`。判据见 `master-contract.md` §4 |
+| **控制参数**（不是槽） | `master/types.ts` 的 `LAYOUT_CONTROL_PROPS` —— 「怎么排」类参数（`staggerInFrames`），**不进** `LAYOUT_SPECS`。判据见 [`master-contract.md`](../../references/master-contract.md) §4 |
 | 验证载体 | `templates/` 的 4 个演示合成 |
 | 组件层验证（**故意不经过母版**） | `templates/Scene.tsx` —— 见下 |
 | **类型专属家具怎么挂进来** | `master/types.ts` 的两个通用插槽 `headExtra` / `footExtra`（`master-contract.md` 有完整例子） |
@@ -310,7 +310,7 @@ npx remotion render <comp-id> out/draft.mp4 --scale=0.5 --crf=28 --jpeg-quality=
 | 限制 | 对策 |
 | --- | --- |
 | 用网络字体时，字体未加载则测量不准 | 先 `waitUntilDone()` 再渲染；或改用系统字体。**字体栈必须点名目标环境里真实存在的字**，否则中文字重会逐段回退，同帧混排宋体 + 黑体 |
-| 母版层从主题取缓动（`theme.motion.enter`），在 Studio 里不可逐处编辑 | **有意为之**：动效签名属于主题。⚠️ **原语层（`components/`）的缓动虽然内联，今天也不可编辑** —— 今天全层 `keyframed` **0** 格；内联只是必要条件，成因与读数见 `references/component-contract.md` §3 |
+| 母版层从主题取缓动（`theme.motion.enter`），在 Studio 里不可逐处编辑 | **有意为之**：动效签名属于主题。⚠️ **原语层（`components/`）的缓动虽然内联，今天也不可编辑** —— 今天全层 `keyframed` **0** 格；内联只是必要条件，成因与读数见 [`references/component-contract.md`](../../references/component-contract.md) §3 |
 | 护栏算出的字号是「计算值」，Studio 不可编辑 | 同上 —— 护栏的职责是「不溢出」，不是「可微调」 |
 | 原语的字号默认值是内联常量（如 `Title` 的 96），不跟随主题字阶 | **有意为之**：Studio 只能编辑内联值。要跟随主题就显式传 `theme.type.title`，或直接用版式 |
 | 版式的 `name`、`.map()` 出的行名由索引算 | Studio 可选中，回写不如硬编码名字稳定 |
@@ -323,7 +323,7 @@ npx remotion render <comp-id> out/draft.mp4 --scale=0.5 --crf=28 --jpeg-quality=
 | **`ScrollArea` 只在渲染期量一次尺寸** | 内容在渲染期不会变，所以量一次就够。**要动态换内容，请换 `key` 让组件重挂载** —— 否则量到的还是旧的 |
 | **`ScrollArea` 的 `scale` 为 0 时兜成 1** | 宿主在量出自己的尺寸之前可能给 0（画廊的格子就是）。不兜会得到 `Infinity` |
 | **`ScrollArea` 只平移一整个内容块**（素材 / 结构的边界在这儿） | ① **钉表头**：「钉住素材的一部分」做不到 —— 一张截图里**没有「表头」这个对象**；`header` prop 钉的是**独立元素**（结构）。截图要钉，只能在**素材制作那一步**把表头切成另一张图（那张图自己有高度），或从图里裁一条出来（`clip` 是**写死的像素**，缝 = 带高 − `clip`：宽 1000 时实测 **18.3px**、正文顶还会重影 22 图象素）。② **锚行**：结构版的行高是**代码里的数**（`ROW_H`），截图版只能靠**源坐标标注**（图内表头高 / 行高）× 显示 scale —— 实测目测差 1px，第 k 条就偏 ≈k px（k=7 时 **7.5px**）。③ **首行 / 末行居中没有解**：`y` 必须落在 `[0, max]` 内，本夹具里 k=11 贴底后偏 **74.0px** |
-| **`MediaStage` 不提供滚动 API，长内容交给 `ScrollArea`** | `MediaStage` 只负责「把内容塞进框里」（`fit` / 标签条 / 框）；要**滚动显示**长内容就换成 `<MediaStage><ScrollArea scroll>…</ScrollArea></MediaStage>` —— 机制在 `ScrollArea` 里：内容放进 `children`、绝对定位、按 `scroll` 平移，超出部分由它自己的 `overflow: hidden` 裁掉（视频里没有「滚动」这个动作，所谓滚动就是**框不动、内容按帧平移**）。⚠️ **「滚多远」由 `ScrollArea` 自己量**（见 `references/component-contract.md` §6：**测量是允许的**，条件是别在补间里测、要除以 `useCurrentScale()`）。早先这里记的「组件不许测量、所以滚多远只能由调用方声明」是**错的推论**，已作废 |
+| **`MediaStage` 不提供滚动 API，长内容交给 `ScrollArea`** | `MediaStage` 只负责「把内容塞进框里」（`fit` / 标签条 / 框）；要**滚动显示**长内容就换成 `<MediaStage><ScrollArea scroll>…</ScrollArea></MediaStage>` —— 机制在 `ScrollArea` 里：内容放进 `children`、绝对定位、按 `scroll` 平移，超出部分由它自己的 `overflow: hidden` 裁掉（视频里没有「滚动」这个动作，所谓滚动就是**框不动、内容按帧平移**）。⚠️ **「滚多远」由 `ScrollArea` 自己量**（见 [`references/component-contract.md`](../../references/component-contract.md) §6：**测量是允许的**，条件是别在补间里测、要除以 `useCurrentScale()`） |
 | **`TextTag` 假设文字是短的** | 它 `whiteSpace: nowrap` —— 一枚标签不换行（换行的胶囊看起来是坏的）。太长就**溢出**，不报错。标签是「两三个字到六七个字」，一整句话该用 `Subtitle` |
 | **`TextTag` 的四种分量共用一套盒子几何** | 描边的那两种会把盒子撑大 2px，同一排里就错位了。所以实底 / 淡底也写了一条 `1px solid transparent` 占位 —— **这条边框不是装饰，它参与布局**，删掉就会让四种分量高低不一 |
 | **`RichTextBox` 的标记是「小语言」，规则只有三条** | 谁先出现谁先切 / 不配对就原样输出 / 不嵌套。所以 `**` 只打一半最坏是多显示两个星号（**不会吞掉后半篇**）。⚠️ 标记本身会被消费掉，要纯文本用导出的 `richTextToPlain`（测量字号前必须先过它，否则会多量出几个星号的宽度） |
@@ -361,9 +361,4 @@ npx remotion render <comp-id> out/draft.mp4 --scale=0.5 --crf=28 --jpeg-quality=
 **验收 = 三件事**：`tsc --noEmit` exit 0 · `compositions` 列出全部合成 · **按版式抽帧并真的看图**
 （每个版式一张，清单类补末尾帧）。命令与判据见 `SKILL.md` 第四节。
 
-改了内核任何一层，按 `references/modification-workflow.md` 第 5 节把回归扩到**每个类型包**的演示合成。
-
-## 实施记录
-
-逐轮实施记录**不在本文件里**：各原语的设计理由、缺陷与修法、当时的抽帧读数都留在 **git 历史**
-（`git log --follow -- kits/kernel/kit.md`）。本文件只描述**现状**：清单 / 已知限制 / 验收要跑什么。
+改了内核任何一层，按 [`references/modification-workflow.md`](../../references/modification-workflow.md) 第 5 节把回归扩到**每个类型包**的演示合成。

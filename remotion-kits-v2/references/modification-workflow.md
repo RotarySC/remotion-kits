@@ -87,7 +87,7 @@
 
 | 改这里 | 谁被波及 | 硬规则 |
 | --- | --- | --- |
-| `theme/**` | 该套件的每个版式、每个原语、每件家具 | **不许改版式一行**（`theme-contract.md` 第 6.3 节的 0 行改动硬指标） |
+| `theme/**` | 该套件的每个版式、每个原语、每件家具 | **不许改版式一行**（[`theme-contract.md`](theme-contract.md) 第 6.3 节的 0 行改动硬指标） |
 | `master/furniture/**` | 该套件的每个版式（家具与内容区不得重叠） | 位置由边距常量固定；字号用 `box.scale` |
 | `master/layouts/**` | 只有这个版式 | 版式只管内容区：不重复家具、不改安全区 |
 | `master/types.ts`（槽契约） | **所有**读这个槽的版式 | `required` / `overflow` / `kind` 必须与实现一致 |

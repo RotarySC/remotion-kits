@@ -76,7 +76,7 @@ npx remotion render <comp-id> out.webm \
 
 ---
 
-## 本机环境的坑
+## 运行环境的坑
 
 - **没有 Chrome 时**，Remotion 需要显式指向 Edge：`Config.setBrowserExecutable('...msedge.exe')`。项目里的 `remotion.config.ts` 应当做一次候选探测；
 - **`--props` 内联 JSON 在 Windows shell 里会被吃掉引号** —— 必须写成文件再用 `--props=props.json`；

@@ -55,7 +55,7 @@
 **展示用的字段也不属于主题。** 主题的中文名（展示页上那个 `signal-dark · 信号暗色`）
 住在套件根的 `labels.ts`，不在 `Theme` 里 —— 展示页读的是那张表，出片路径一行都不碰它。
 `Theme` 的每个字段都必须有消费者（第 5 节），而中文名只有展示页消费，
-所以它进 `Theme` 就违反了本节与第 5 节两条。同理见 `component-contract.md` §5。
+所以它进 `Theme` 就违反了本节与第 5 节两条。同理见 [`component-contract.md`](component-contract.md) §5。
 
 ---
 

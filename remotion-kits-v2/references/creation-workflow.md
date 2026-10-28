@@ -110,14 +110,14 @@ export const COMPOSE = { sources: ['../kernel'] } as const;
 | `required` | 必填 / 可选 | **缺了这期就不成立** → 必填 |
 | `overflow` | `fit` / `fit-n-lines` / `clamp` / `none` | 见下 |
 
-溢出策略的选择规则（`master-contract.md` 第 5 节）：
+溢出策略的选择规则（[`master-contract.md`](master-contract.md) 第 5 节）：
 
 - **必填槽 → `fit-n-lines`**：必须完整显示，所以缩字号；
 - **可选槽 → `clamp`**：显示不完没关系，截断即可；
 - **短而固定的 → `fit`**：缩到一行放得下；
 - **本来就不会溢出（如两位序号）→ `none`**，不要白测。
 
-可选槽缺省时**版式必须优雅降级，不留空洞**（`master-contract.md` 第 4 节）。
+可选槽缺省时**版式必须优雅降级，不留空洞**（[`master-contract.md`](master-contract.md) 第 4 节）。
 
 **产出**：写进 `master/types.ts` 的 `LAYOUT_SPECS` 条目 —— 它是机器可读的，后续流程靠它而非靠猜。
 ⚠️ 只写**这个类型特有**的版式：内核那 6 个通用版式的槽契约在内核的 `master/types.ts` 里，
@@ -146,7 +146,7 @@ export const COMPOSE = { sources: ['../kernel'] } as const;
   **新字段全部可选** —— 不传就不渲染那件家具；
 - 家具在 `master/furniture/` 下各一文件，位置由**边距常量**固定，**必须完全落在安全区内**；
 - 家具与内容区**不得重叠**，且给家具让位**不能用 `padding`**（绝对定位的子元素不会被父元素 padding 挤开，
-  见 `master-contract.md` 第 2 节的三条陷阱）；
+  见 [`master-contract.md`](master-contract.md) 第 2 节的三条陷阱）；
 - 家具字号一律用母版的 `box.scale`（`Math.min(width, height) / 1080`）。
 
 **产出**：`FurnitureConfig` 的扩展字段表 + `master/furniture/` 下的实现。
@@ -170,7 +170,7 @@ export const COMPOSE = { sources: ['../kernel'] } as const;
   （`ThemeProvider` / `useTheme` / `Theme` 类型**要**从内核 re-export：全系统只有**一个** context，
   类型包复制第二个，原语与版式就会读到两份主题。）
 
-**验收判据（`theme-contract.md` 第 6.3 节）**：加这套主题前后，`master/**` + `guards/**` + `components/**`
+**验收判据（[`theme-contract.md`](theme-contract.md) 第 6.3 节）**：加这套主题前后，`master/**` + `guards/**` + `components/**`
 必须逐条一致 —— **换主题时版式 0 行改动**。这条不通过，说明主题层没封住。
 
 **产出**：`kits/<类型>/theme/<id>.ts` + 登记。
@@ -226,7 +226,7 @@ export const COMPOSE = { sources: ['../kernel'] } as const;
   可选槽与家具字段「从不缺省」聚合成一条，走 `NOTE` 通道）。
   只摆一条分支，另一条就是**静默**的 —— `ListLayout` 漏解析 TAB 那个缺陷，
   正因为夹具里从来没写过带主字段的条目，才在展示页里完全看不见
-  （硬规则见 `master-contract.md` §4）。
+  （硬规则见 [`master-contract.md`](master-contract.md) §4）。
 
 > ⚠️ **组件层演示（`KitShowcase`）不要在这里造，也不要搬一份进来。** 它演示的是内核的 19 个原语，
 > 随**元件层**一起由 `compose.ts` 从来源补入。类型包自己那份 `templates/` 只放
@@ -243,7 +243,7 @@ export const COMPOSE = { sources: ['../kernel'] } as const;
 - **按版式抽帧**（每个版式一张），不是按场景抽：一个版式可能对应多场戏，按场景抽会漏掉没用到的排版；
 - 清单类版式**额外抽一张末尾帧**（条目全部入场后），否则「后几条来不及出现」查不出来；
 - 加主题时做哈希比对：加主题前后 `master/**` + `guards/**` + `components/**` 必须逐条一致
-  （版式 0 行改动），完整命令见 `theme-contract.md` 第 6 节。
+  （版式 0 行改动），完整命令见 [`theme-contract.md`](theme-contract.md) 第 6 节。
 
 **产出**：结果记回该套件 `kit.md` 的验证记录（环境版本 + 命令 + 结果 + 抓到的缺陷）。
 

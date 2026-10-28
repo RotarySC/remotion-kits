@@ -108,7 +108,7 @@
 另有一个 **`labels.ts`**：五层展品（元素 / 版式 / 家具 / 主题 / 场景）的**中文名**，
 只被 `showcase/generate.ps1` 解析、只出现在展示页上（`Title · 主标题`）。
 **它不是第四层** —— 不参与出片，所以不进 `Theme` / `LAYOUT_SPECS` / `FurnitureConfig`。
-理由与覆盖率校验见 `component-contract.md` §5。
+理由与覆盖率校验见 [`component-contract.md`](component-contract.md) §5。
 
 ### 主题（换主题不换版式）
 

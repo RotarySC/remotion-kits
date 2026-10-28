@@ -61,7 +61,7 @@ description: "Remotion 组件套件构建：把一类视频需求沉淀成可复
 
 文件级落点：
 
-- **主题**：照 `theme/default.ts` 复制 → 登记 `theme/index.ts` → 跑 `references/theme-contract.md` §6 的三步验证。
+- **主题**：照 `theme/default.ts` 复制 → 登记 `theme/index.ts` → 跑 [`references/theme-contract.md`](references/theme-contract.md) §6 的三步验证。
 - **版式**：`master/layouts/` ＋ 槽注册 `master/types.ts` → 场景加进 `templates/ShowcaseScenes.tsx`（母版演示与所有主题演示都会覆盖到它）。先看内核 `master/layouts/` 里已有什么。
 - **家具**：`master/furniture/` ＋ `FurnitureConfig`（用 `&` 扩展内核那份）。
 - **组件**：见 `references/authoring.md`。复用 ≥2 次、或这一支独有且复杂到值得隔离，才做成组件。
@@ -116,7 +116,7 @@ pwsh -File "<技能目录>\tools\update-kits.ps1" -Project "<工程根>" -Instal
 ```
 
 - 每个 `<Sequence>` 都给 `premountFor`；`name` 是 Studio 时间线上的标签，写死。
-- 逐实例的**尺寸**内联在调用处（静态值才可编辑）。时间也内联，但它今天仍会被算成不可编辑的一格 —— 判据见 `references/component-contract.md` §3。
+- 逐实例的**尺寸**内联在调用处（静态值才可编辑）。时间也内联，但它今天仍会被算成不可编辑的一格 —— 判据见 [`references/component-contract.md`](references/component-contract.md) §3。
 
 **更新已装的副本**：
 
