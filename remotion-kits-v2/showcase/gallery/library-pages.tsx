@@ -98,10 +98,30 @@ export function LibraryPages(p: Props) {
           </article>
         </div>
         <div className="relationship">
-          <strong>如何组合</strong>
-          <p>创作项目 → 通用内核</p>
-          <p>创作项目 → 选用的类型包 → 声明的能力来源</p>
-          <small>目录记录维护归属；真实演示按声明组合。展示页提供发现与试验工具。</small>
+          <div className="rel-head">
+            <strong>如何组合</strong>
+            <small>目录记录维护归属；真实演示按声明组合。展示页提供发现与试验工具。</small>
+          </div>
+          <div className="rel-paths">
+            <div className="rel-path">
+              <span>直接复用</span>
+              <p>
+                <b>创作项目</b>
+                <i>→</i>
+                <b>通用内核</b>
+              </p>
+            </div>
+            <div className="rel-path">
+              <span>带类型差异</span>
+              <p>
+                <b>创作项目</b>
+                <i>→</i>
+                <b>选用的类型包</b>
+                <i>→</i>
+                <b>声明的能力来源</b>
+              </p>
+            </div>
+          </div>
         </div>
       </section>
     );

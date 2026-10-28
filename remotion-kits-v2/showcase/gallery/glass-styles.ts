@@ -1,7 +1,7 @@
 // 展示界面的玻璃材质；不覆盖 .native-scene 内套件自己的主题。
 export const GLASS_STYLES = `
 :root {
-  --bg: #edf0f7;
+  --bg: #edeef0;
   --surface: rgba(255,255,255,.52);
   --line: rgba(94,110,142,.16);
   --text: #202838;
@@ -11,7 +11,7 @@ export const GLASS_STYLES = `
   color-scheme: light;
 }
 .app {
-  --bg: #edf0f7;
+  --bg: #edeef0;
   --surface: rgba(255,255,255,.52);
   --line: rgba(94,110,142,.16);
   --text: #202838;
@@ -26,7 +26,7 @@ export const GLASS_STYLES = `
   --control: rgba(255,255,255,.48);
   --selected: rgba(47,111,221,.12);
   --selected-edge: rgba(47,111,221,.25);
-  --solid-surface: #eef2f9;
+  --solid-surface: #f4f5f7;
   --panel-shadow: 0 8px 28px rgba(41,54,90,.065), inset 0 1px 0 rgba(255,255,255,.38);
   --warning: #92531b;
   --success: #16704a;
@@ -37,11 +37,9 @@ export const GLASS_STYLES = `
   border: 0;
   border-radius: 0;
   box-shadow: none;
-  background:
-    radial-gradient(ellipse at 10% 4%, rgba(171,197,250,.76), transparent 48%),
-    radial-gradient(ellipse at 94% 24%, rgba(224,190,238,.57), transparent 51%),
-    radial-gradient(ellipse at 20% 100%, rgba(179,218,237,.65), transparent 52%),
-    #ecedf5;
+  /* 中性浅灰：不带色相。缩略图里是视频帧自己的近黑底（主题 #0B0D10），
+     页面越少彩度，那块黑就越像「装进去的屏」而不是「挖出来的洞」。 */
+  background: #edeef0;
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "Microsoft YaHei", sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -142,7 +140,6 @@ export const GLASS_STYLES = `
 .overview-intro { margin-bottom: 30px; line-height: 1.8; }
 .overview-grid { gap: 20px; }
 .overview-grid article,
-.relationship,
 .pack-card,
 .asset-card,
 .capability-grid > button,
@@ -155,15 +152,38 @@ export const GLASS_STYLES = `
   box-shadow: var(--panel-shadow);
 }
 .overview-grid article,
-.relationship,
 .inspector {
   -webkit-backdrop-filter: blur(18px) saturate(140%);
   backdrop-filter: blur(18px) saturate(140%);
 }
 .overview-grid article { padding: 30px; }
 .overview-grid h2 { font-size: 27px; font-weight: 650; letter-spacing: -.65px; }
-.relationship { margin-top: 24px; padding: 25px 28px; }
-.relationship p { line-height: 1.8; }
+/* 「如何组合」是**脚注**，不是第三张卡：去掉玻璃底板、圆角与阴影，只留一道上规则线，宽度随网格。
+   内容是两条路径，所以并排两栏 —— 排成上下两行普通段落时，看不出「A 走到 C」。
+   ⚠️ 基础样式里它带着 padding:28px / border:1px / border-radius:8px / background / max-width:1000px，
+   四条都要显式清掉，否则它会继续以「第三张卡」的形态出现，而且右边缘短一截。 */
+.relationship {
+  margin-top: 24px;
+  max-width: none;
+  padding: 22px 0 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  color: var(--muted);
+}
+.rel-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.rel-head strong { color: var(--text); font-size: 14px; font-weight: 600; }
+.rel-head small { color: var(--muted); font-size: 11px; }
+.rel-paths { display: grid; grid-template-columns: 1fr 1.4fr; gap: 28px; margin-top: 14px; }
+.rel-path > span { display: block; color: var(--muted); font-size: 10px; letter-spacing: 1.1px; margin-bottom: 6px; }
+.rel-path p { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0; font-size: 13px; color: var(--text); }
+.rel-path p b { font-weight: 550; }
+.rel-path p i { color: var(--accent); font-style: normal; opacity: .75; }
+.rel-path + .rel-path { border-left: 1px solid var(--line); padding-left: 28px; }
 .gallery-grid { gap: 18px; }
 .asset-card,
 .related button,
@@ -194,6 +214,10 @@ export const GLASS_STYLES = `
 .purpose { line-height: 1.85; }
 .preview-toolbar { padding: 12px 15px; background: var(--control); border-color: var(--line); }
 .canvas { background: #0b0e14; }
+/* 浅色模式下缩略图里那块近黑视频帧（主题 color.bg，默认 #0B0D10）直接挨着卡片的浅色面，
+   会形成一次亮度断崖。**不改帧的底色**（那是演示内容本身），只给边界一道 1px 内描边：
+   读起来是「框住的一块屏」。暗色模式不加 —— 深对深本来就是同一族，描边只会显脏。 */
+.app:not(.dark) .card-preview .canvas { box-shadow: inset 0 0 0 1px rgba(24,32,48,.13); }
 .player-bar { background: var(--control); border-color: var(--line); padding: 12px 15px; }
 .player-bar .play { height: 32px; }
 .related-title { color: var(--text); font-weight: 500; }
@@ -247,20 +271,24 @@ export const GLASS_STYLES = `
   .workspace { padding: 21px 16px; }
   .workspace h1 { font-size: 23px; }
   .overview-intro .lead { font-size: 24px; }
-  .overview-grid article,.relationship { padding: 24px; }
+  .overview-grid article { padding: 24px; }
+  .rel-paths { grid-template-columns: 1fr; gap: 14px; }
+  .rel-path + .rel-path { border-left: 0; padding-left: 0; }
   .brand > b { font-size: 28px; }
   .sidebar-catalog nav a { min-height: 40px; }
 }
+/* 回退档只处理**有玻璃底板**的面；「如何组合」已经是无底板的脚注，列进来会把它又变成一张卡。 */
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
-  .topbar,.sidebar,.overview-grid article,.relationship,.inspector,.sync-dialog { background: var(--solid-surface); }
+  .topbar,.sidebar,.overview-grid article,.inspector,.sync-dialog { background: var(--solid-surface); }
 }
 @media(prefers-reduced-transparency:reduce) {
-  .topbar,.sidebar,.overview-grid article,.relationship,.inspector,.sync-dialog,.asset-card,.pack-card,.preview,.related button { background: var(--solid-surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .topbar,.sidebar,.overview-grid article,.inspector,.sync-dialog,.asset-card,.pack-card,.preview,.related button { background: var(--solid-surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
   .sync-dialog::backdrop { -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
 @media(forced-colors:active) {
   .app { background: Canvas; color: CanvasText; border-color: CanvasText; }
-  .topbar,.sidebar,.overview-grid article,.relationship,.inspector,.sync-dialog,.asset-card,.pack-card,.preview,.related button { background: Canvas; border-color: CanvasText; -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; }
+  .topbar,.sidebar,.overview-grid article,.inspector,.sync-dialog,.asset-card,.pack-card,.preview,.related button { background: Canvas; border-color: CanvasText; -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; }
+  .rel-path p i { color: CanvasText; }
   .app button:focus-visible,.app a:focus-visible,.app input:focus-visible,.app select:focus-visible { outline-color: Highlight; }
 }
 `;
