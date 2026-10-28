@@ -23,7 +23,7 @@
 
 **组织方式**：内核 **67** 个文件全系统只有一份；类型包 **17** 个文件只放差异，运行时靠自己的 `master/MasterFrame.tsx` 适配器把「内核引擎 ＋ 本套件家具」组合起来，调用方接口不变。
 
-**规模**（2026-10-28 现测）：仓库 **143** 个文件 ＝ [`remotion-kits-v2/`](remotion-kits-v2/) **123**（`kits/` 84 ＝ kernel 67 ＋ hotspot 17 · `references/` 9 · `showcase/` 25 · `tools/` 4 · `SKILL.md`）＋ [`tools/`](tools/) 16 ＋ 根 4。
+**规模**（2026-10-28 现测）：仓库 **142** 个文件 ＝ [`remotion-kits-v2/`](remotion-kits-v2/) **122**（`kits/` 84 ＝ kernel 67 ＋ hotspot 17 · `references/` 9 · `showcase/` 24 · `tools/` 4 · `SKILL.md`）＋ [`tools/`](tools/) 16 ＋ 根 4。
 
 **分发是版本化源码复制，不是共享依赖**：套件被复制进工程，工程可以就地改；要跟随上游更新就跑更新器。它靠 `<工程>/.kit-origin/` 里的**基线**分清「上游改了」与「你为这支片子改过」—— 没有基线，这两件事长得一模一样。
 
@@ -143,8 +143,8 @@ pwsh -NoProfile -File tools\kit-copy-check.ps1   # 母本 / 仓库 / 各工程�
 | 五层职责、创作 / 改造 / 入库 / 渲染档 | [`SKILL.md`](remotion-kits-v2/SKILL.md) 与 [`references/`](remotion-kits-v2/references/) |
 | 主题 / 母版 / 组件契约 | `references/theme-contract.md` · `master-contract.md` · `component-contract.md` |
 | 某个套件能干什么、已知限制 | [`kits/kernel/kit.md`](remotion-kits-v2/kits/kernel/kit.md) · [`kits/hotspot/kit.md`](remotion-kits-v2/kits/hotspot/kit.md) |
-| 展示页设计与验收断言 | [`showcase/README.md`](remotion-kits-v2/showcase/README.md) · [`showcase/DESIGN.md`](remotion-kits-v2/showcase/DESIGN.md) |
-| 从需求到成片的八阶段主线 | [`remotion-workflow.md`](remotion-workflow.md) |
+| 展示页用法与验收断言 | [`showcase/README.md`](remotion-kits-v2/showcase/README.md) |
+| 从需求到成片的七阶段主线 | [`remotion-workflow.md`](remotion-workflow.md) |
 
 ## 自验
 
@@ -174,7 +174,7 @@ pwsh -NoProfile -File tools\kit-copy-check.ps1
 git diff --check
 ```
 
-末次完整读数（**2026-10-28 重跑**，提交 `d8a5cb2` 之后）：页面结构 **90 项** · 工作台 **39 项** · 真实交互 **60 项 / 0 运行错误 / 1 条预期诊断** · 同步管线 **34 项**。构建发布 1 个 build（64 个唯一资产 · hotspot 3 版式 / 4 场景 · kernel 6 版式 / 8 场景 · **24 条 NOTE、0 WARN**），bundle **717,664 B**、静帧 **56 张**，随后 `--check --suite kernel` 返回 `fresh: true`；`tsc --noEmit` exit 0（内核工作台与工程副本各跑一次）· `mirror-check` **123/123** · `kit-copy-check` **84/84 × 4 处**。
+末次完整读数（**2026-10-28 重跑**，提交 `d8a5cb2` 之后）：页面结构 **90 项** · 工作台 **39 项** · 真实交互 **60 项 / 0 运行错误 / 1 条预期诊断** · 同步管线 **34 项**。构建发布 1 个 build（64 个唯一资产 · hotspot 3 版式 / 4 场景 · kernel 6 版式 / 8 场景 · **24 条 NOTE、0 WARN**），bundle **717,664 B**、静帧 **56 张**，随后 `--check --suite kernel` 返回 `fresh: true`；`tsc --noEmit` exit 0（内核工作台与工程副本各跑一次）· `mirror-check` **122/122** · `kit-copy-check` **84/84 × 4 处**。
 
 **测什么算数**：
 

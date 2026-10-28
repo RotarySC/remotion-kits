@@ -162,7 +162,7 @@ Pop-Location
 | 新组件入库的子流程 | `references/authoring.md` |
 | 渲染档位与昂贵组件的 flag | `references/render-profiles.md` |
 | 有哪些套件、常见类型怎么配版式 | `references/catalog.md` |
-| 展示页怎么用、构建失败怎么查 | `showcase/README.md` · `showcase/DESIGN.md` |
+| 展示页怎么用、构建失败怎么查 | `showcase/README.md` |
 | 某个套件能干什么、已知限制 | `kits/<套件>/kit.md` |
 
 ## 六、目录骨架
